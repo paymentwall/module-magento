@@ -3,7 +3,7 @@ Paymentwall module for Magento is a payment service for processing payments glob
 
 
 ###Versions
-Required Magento CE 1.7+
+Requires Magento CE 1.7+
 
 #Installation
 To install Paymentwall Magento module, please follow the [instructions](https://www.paymentwall.com/en/documentation/Magento/827).
