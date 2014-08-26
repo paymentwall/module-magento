@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <payment>
+            <groups>
+                <paymentwall translate="label" module="paymentwall">
+                    <label>Paymentwall</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>103</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </active>
+                        <title translate="label">
+                            <label>Title</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title>
+                        <paymentwall_shop_id translate="label">
+                            <label>App ID</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </paymentwall_shop_id>
+                        <paymentwall_secret translate="label">
+                            <label>Secret key</label>
+                            <frontend_type>text</frontend_type>
+                            
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </paymentwall_secret>
+                        <paymentwall_widget_code translate="label">
+                            <label>Widget code</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </paymentwall_widget_code>
+                        <paymentwall_url translate="label">
+                            <label>Success URL</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </paymentwall_url>
+                        <paymentwall_istest translate="label">
+                            <label>Test mode?</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </paymentwall_istest>
+                    </fields>
+                </paymentwall>
+            </groups>
+        </payment>
+    </sections>
+</config>
