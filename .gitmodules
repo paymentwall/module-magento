@@ -1,0 +1,3 @@
+[submodule "app/code/community/Paymentwall/Pwpayment/Model/includes/paymentwall-sdk"]
+	path = app/code/community/Paymentwall/Pwpayment/Model/includes/paymentwall-sdk
+	url = git@github.com:paymentwall/paymentwall-php.git
