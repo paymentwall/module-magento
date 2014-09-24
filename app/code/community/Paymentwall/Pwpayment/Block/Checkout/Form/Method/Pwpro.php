@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @author tridung <tridung@paymentwall.com>
+ * @author Paymentwall Inc. <devsupport@paymentwall.com>
  * @package Paymentwall_Pwpayment
  * 
  * Class Paymentwall_Pwpayment_Block_Checkout_Form_Method_Pwpro
