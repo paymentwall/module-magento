@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<layout>
+    <checkout_onepage_index>
+        <reference name="head">
+            <block type="core/text" name="paymentwall_pwpayment_js">
+                <action method="setText" ifconfig="payment/paymentwall_pwpro/active">
+                    <text><![CDATA[<script src="http://api.paymentwall.com/pro/js/paymentwall.js"></script>]]></text>
+                </action>
+            </block>
+            <action method="addItem" ifconfig="payment/paymentwall_pwpro/active">
+                <type>skin_js</type>
+                <name>js/paymentwall_pwpro.js</name>
+            </action>
+        </reference>
+    </checkout_onepage_index>
+</layout>

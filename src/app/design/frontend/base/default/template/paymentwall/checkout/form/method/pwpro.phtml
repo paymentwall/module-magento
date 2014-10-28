@@ -1,0 +1,88 @@
+<?php
+/**
+ * @var $this Paymentwall_Pwpayment_Block_Checkout_Form_Method_Pwpro
+ */
+
+?>
+<script type="text/javascript">
+    if (!PaymentwallPro.Validator.cards) {
+        PaymentwallPro.Validator.initialize();
+    }
+
+    if(Translator) {
+        Validation.add('paymentwall-validate-cc-number', Translator.translate("enter_valid_cc_num"), function (valueToTest) {
+            return (valueToTest.length > 0) && PaymentwallPro.Validator.validateCardNumber(valueToTest);
+        });
+
+        Validation.add('paymentwall-validate-cc-cvn', Translator.translate("enter_valid_cc_cid"), function (valueToTest) {
+            return (valueToTest.length > 0) && PaymentwallPro.Validator.validateCardSecurityCode(valueToTest);
+        });
+
+        Validation.add('paymentwall-validate-cc-exp', Translator.translate("enter_valid_cc_exp"), function (valueToTest) {
+            var data = valueToTest.split('/', 2);
+            if (data.length < 2) {
+                return false;
+            }
+            return PaymentwallPro.Validator.validateCardExpiry(data[0], data[1]);
+        });
+        
+        Translator.add({
+            enter_valid_cc_num: '<?php echo $this->__("Please enter a valid credit card number") ?>',
+            enter_valid_cc_cid: '<?php echo $this->__("Please enter a valid credit card verification number");?>',
+            enter_valid_cc_exp: '<?php echo $this->__("Please enter a valid credit card expired date"); ?>',
+            cannot_use_payment_method: '<?php echo $this->__("Cannot use the selected payment method") ?>'
+        });
+    }
+
+    var publicKey = '<?php echo $this->getPublicKey(); ?>';
+    PaymentwallPro.Initialize(publicKey, '0', 'USD', {
+        'id': 'custom-form',
+        'formatter': true 
+    });
+</script>
+<?php
+if (!($this->getPublicKey() && $this->getApiKey())) {
+    return;
+}
+
+?>
+<ul class="form-list" id="payment_form_paymentwall_pwpro" style="display: none">
+    <input type="hidden" id="pwpro_public_key" value="<?php echo $this->getPublicKey(); ?>">
+    <li>
+        <p class="required">* <?php echo $this->__("Required fields"); ?></p>
+        <label for="pwpro_name" class="required">
+            <em>*</em>
+            <?php echo $this->__("Cardholder name") ?>
+        </label>
+        <div class="input-box">
+            <input type="text" id="pwpro_name" class="required-entry input-text validate-cc-number" data-paymentwall="payment[cc_owner]">
+        </div>
+    </li>
+    <li>
+        <label for="pwpro_cc_number" class="required">
+            <em>*</em>
+            <?php echo $this->__("Credit Card Number") ?>
+        </label>
+        <div class="input-box">
+            <input type="text" id="pwpro_cc_number" class="input-text paymentwall-validate-cc-number" data-paymentwall="cc-number" />
+        </div>
+    </li>
+    <li>
+        <label for="pwpro_cvv">
+            <em>*</em>
+            <?php echo $this->__("CCV Number") ?>
+        </label>
+        <div class="input-box">
+            <input type="text" id="pwpro_cvv" class="input-text paymentwall-validate-cc-cvn" data-paymentwall="payment[cc_cid]" />
+        </div>
+    </li>
+    <li>
+        <label for="pwpro_cc_exp">
+            <em>*</em>
+            <?php echo $this->__("Expired date"); ?>
+        </label>
+        <div class="input-box">
+            <input type="text" id="pwpro_cc_exp" class="input-text paymentwall-validate-cc-exp" data-paymentwall="cc-expiry" placeholder="MM/YY" />
+        </div>
+    </li>
+</ul>
