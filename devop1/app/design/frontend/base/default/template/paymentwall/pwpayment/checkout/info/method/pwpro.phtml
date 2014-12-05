@@ -1,0 +1,16 @@
+<?php
+$info = $this->getData('info');
+?>
+<?php if (!$this->getHideTitle()): ?>
+    <p><strong><?php echo $this->escapeHtml(Mage::helper('pwpayment')->getPaymentMethodConfig($info->getMethod(), 'title')) ?></strong></p>
+<?php endif;?>
+<dl class="cards-list">
+    <dd>
+        <table class="info-table">
+            <tr>
+                <th><?php echo $this->__('Credit Card Number:') ?></th>
+                <td><?php echo 'XXXX-' . $info->getData('cc_last4'); ?></td>
+            </tr>
+        </table>
+    </dd>
+</dl>
