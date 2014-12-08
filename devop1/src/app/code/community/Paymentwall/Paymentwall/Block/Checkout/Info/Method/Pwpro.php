@@ -2,15 +2,15 @@
 
 /**
  * @author Paymentwall Inc. <devsupport@paymentwall.com>
- * @package Paymentwall_Pwpayment
+ * @package Paymentwall\ThirdpartyIntegration\Magento
  * 
- * Class Paymentwall_Pwpayment_Block_Checkout_Info_Method_Pwpro
+ * Class Paymentwall_Paymentwall_Block_Checkout_Info_Method_Pwpro
  */
-class Paymentwall_Pwpayment_Block_Checkout_Info_Method_Pwpro extends Mage_Checkout_Block_Onepage_Payment_Info
+class Paymentwall_Paymentwall_Block_Checkout_Info_Method_Pwpro extends Mage_Checkout_Block_Onepage_Payment_Info
 {
     protected function _construct()
     {
-        $this->setData('template', 'paymentwall/pwpayment/checkout/info/method/pwpro.phtml');
+        $this->setData('template', 'paymentwall/Paymentwall/checkout/info/method/pwpro.phtml');
         parent::_construct();
     }
 

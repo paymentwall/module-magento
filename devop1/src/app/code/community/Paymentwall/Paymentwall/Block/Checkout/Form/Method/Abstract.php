@@ -2,15 +2,15 @@
 
 /**
  * @author Paymentwall Inc. <devsupport@paymentwall.com>
- * @package Paymentwall_Pwpayment
+ * @package Paymentwall\ThirdpartyIntegration\Magento
  * 
- * Class Paymentwall_Pwpayment_Block_Checkout_Form_Method_Abstract
+ * Class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Abstract
  */
-class Paymentwall_Pwpayment_Block_Checkout_Form_Method_Abstract extends Mage_Payment_Block_Form
+class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Abstract extends Mage_Payment_Block_Form
 {
     /**
      * Get payment model
-     * @return Paymentwall_Pwpayment_Model_Method_Abstract
+     * @return Paymentwall_Paymentwall_Model_Method_Abstract
      */
     public function getModel()
     {

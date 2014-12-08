@@ -2,11 +2,11 @@
 
 /**
  * @author Paymentwall Inc. <devsupport@paymentwall.com>
- * @package Paymentwall_Pwpayment
+ * @package Paymentwall\ThirdpartyIntegration\Magento
  * 
- * Class Paymentwall_Pwpayment_Block_Checkout_Form_Method_Pwpro
+ * Class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Pwpro
  */
-class Paymentwall_Pwpayment_Block_Checkout_Form_Method_Pwpro extends Paymentwall_Pwpayment_Block_Checkout_Form_Method_Abstract
+class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Pwpro extends Paymentwall_Paymentwall_Block_Checkout_Form_Method_Abstract
 {
     /**
      * Set template for block
@@ -15,7 +15,7 @@ class Paymentwall_Pwpayment_Block_Checkout_Form_Method_Pwpro extends Paymentwall
     protected function _construct()
     {
         parent::_construct();
-        $this->setTemplate('paymentwall/pwpayment/checkout/form/method/pwpro.phtml');
+        $this->setTemplate('paymentwall/checkout/form/method/pwpro.phtml');
     }
 
     /**
