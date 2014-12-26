@@ -42,8 +42,7 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
         // we should get the data here via $_POST
         $pingbackModel = Mage::getModel('paymentwall/pingback');
         $result = $pingbackModel->handlePingback();
-
-        die(json_encode($result));
+        die($result);
     }
 
     public function pwlocalAction()

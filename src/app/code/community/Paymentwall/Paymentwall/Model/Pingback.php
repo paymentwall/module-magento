@@ -10,31 +10,34 @@ if (!class_exists('Paymentwall_Base')) {
 class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
 {
     /**
-     * Handle ping back
-     * @return [type] [description]
+     * Handle pingback
+     * @return string
      */
     public function handlePingback()
     {
-        $result = array('success' => false);
-        $pingback = new Paymentwall_Pingback($_POST, $_SERVER['REMOTE_ADDR']);
+        $result = '';
+        $pingback = new Paymentwall_Pingback($_GET, $_SERVER['REMOTE_ADDR']);
+        
         if ($pingback->validate()) {
             $order = Mage::getModel('sales/order')->loadByIncrementId($pingback->getProductId());
             if ($order->getId()) {
                 try {
                     $paymentModel = $order->getPayment()->getMethodInstance();
                     $paymentModel->setCurrentOrder($order)->processPendingPayment($pingback);
-                    $result['success'] = true;
+                    $result = 'OK';
                 } catch (Exception $e) {
                     Mage::log($e->getMessage());
-                    $result['message'] = "Internal server error";
+                    $result = 'Internal server error';
                 }
             } else {
-                $result['message'] = "Invalid order";
+                $result = 'Invalid order';
             }
         } else {
-            $result['message'] = "Invalid pingback";
+            $result = $pingback->getErrorSummary();
         }
 
-        return $result;
+        return $result;    
     }
+
+
 }
