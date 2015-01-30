@@ -61,6 +61,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
                 'success_url' => Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_url'),
                 'test_mode' => (int) Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_istest'),
 				'integration_module' => 'magento'
+				)
         );
 
         return $widget;
