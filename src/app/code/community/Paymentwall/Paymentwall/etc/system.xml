@@ -29,7 +29,7 @@
                             <show_in_store>1</show_in_store>
                         </title>
                         <paymentwall_shop_id translate="label">
-                            <label>App ID</label>
+                            <label>Project Key</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
@@ -37,7 +37,7 @@
                             <show_in_store>0</show_in_store>
                         </paymentwall_shop_id>
                         <paymentwall_secret translate="label">
-                            <label>Secret key</label>
+                            <label>Secret Key</label>
                             <frontend_type>text</frontend_type>
                             
                             <sort_order>4</sort_order>
@@ -46,7 +46,7 @@
                             <show_in_store>0</show_in_store>
                         </paymentwall_secret>
                         <paymentwall_widget_code translate="label">
-                            <label>Widget code</label>
+                            <label>Widget Code</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
@@ -62,7 +62,7 @@
                             <show_in_store>0</show_in_store>
                         </paymentwall_url>
                         <paymentwall_istest translate="label">
-                            <label>Test mode?</label>
+                            <label>Test Mode</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>6</sort_order>
@@ -73,7 +73,7 @@
                     </fields>
                 </paymentwall_pwlocal>
                 <paymentwall_pwpro translate="label" module="paymentwall">
-                    <label>PaymentWall PW Pro</label>
+                    <label>Paymentwall PW Pro</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>104</sort_order>
                     <show_in_default>1</show_in_default>
