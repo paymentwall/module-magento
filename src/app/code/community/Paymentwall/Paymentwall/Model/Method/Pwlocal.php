@@ -38,16 +38,16 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
         }
 
         Paymentwall_Base::setApiType(Paymentwall_Base::API_GOODS);
-        Paymentwall_Base::setAppKey($appKey); // available in your Paymentwall merchant area
-        Paymentwall_Base::setSecretKey($secret); // available in your Paymentwall merchant area
+        Paymentwall_Base::setAppKey($appKey);
+        Paymentwall_Base::setSecretKey($secret);
     }
 
     public function getPaymentWidget($order)
     {
         $widget = new Paymentwall_Widget(
-            $order->getCustomerEmail(),   // id of the end-user who's making the payment
-            Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_widget_code'),        // widget code, e.g. p1; can be picked inside of your merchant account
-            array(         // product details for Flexible Widget Call. To let users select the product on Paymentwall's end, leave this array empty
+            $order->getCustomerEmail(),
+            Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_widget_code'),
+            array(
                 new Paymentwall_Product(
                     $order->getIncrementId(),
                     $order->getGrandTotal(),
@@ -60,8 +60,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
                 'email' => $order->getCustomerEmail(),
                 'success_url' => Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_url'),
                 'test_mode' => (int) Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_istest'),
-				'integration_module' => 'magento'
-				)
+                'integration_module' => 'magento'
+            )
         );
 
         return $widget;

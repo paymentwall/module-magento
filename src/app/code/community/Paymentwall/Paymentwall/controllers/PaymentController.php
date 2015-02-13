@@ -8,7 +8,7 @@
 if (!class_exists('Paymentwall_Base')) {
     require_once dirname(
             dirname(__FILE__)
-        ) . DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'paymentwall-sdk' . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'paymentwall.php';
+        ) . DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'paymentwall-php' . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'paymentwall.php';
 }
 
 /**

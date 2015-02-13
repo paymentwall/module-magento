@@ -6,7 +6,7 @@
  */
 
 if (!class_exists('Paymentwall_Base')) {
-    require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'paymentwall-sdk' . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'paymentwall.php';
+    require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'paymentwall-php' . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'paymentwall.php';
 }
 
 /**
@@ -37,7 +37,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
     public function processPendingPayment(Paymentwall_Pingback $pingback)
     {
         $order = $this->getCurrentOrder();
-        if ($order->getState() === Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW) {
+        if ($order->getState() === Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW || $order->getState() === Mage_Sales_Model_Order::STATE_NEW) {
             if ($pingback->isDeliverable()) {
                 $this->makeInvoice();
             } elseif ($pingback->isCancelable()) {
@@ -53,4 +53,30 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
             throw new Exception("This order {$incrementId} is not put in PENDING REVIEW STATE", 1);
         }
     }
+    
+    
+    private function makeInvoice()
+    {
+        $order = $this->getCurrentOrder();
+        if ($order) {
+            $invoice = $order->prepareInvoice()
+                ->setTransactionId($order->getId())
+                ->addComment("Invoice created by PaymentWall Paymentwall module")
+                ->register()
+                ->pay();
+
+            $transactionSave = Mage::getModel('core/resource_transaction')
+                ->addObject($invoice)
+                ->addObject($invoice->getOrder());
+
+            $transactionSave->save();
+
+            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true)->save();
+        }
+    }
+    
+    
 }
+
+    
+    
