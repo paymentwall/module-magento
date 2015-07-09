@@ -1,35 +1,34 @@
 <?php
+
+if (!class_exists('Paymentwall_Config'))
+    require_once Mage::getBaseDir('lib') . '/paymentwall-php/lib/paymentwall.php';
+
 /**
  * @author Paymentwall Inc <devsupport@paymentwall.com>
  * @package Paymentwall\ThirdpartyIntegration\Magento
  */
-if (!class_exists('Paymentwall_Base')) {
-    require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'paymentwall-php' . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'paymentwall.php';
-}
-
 class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
 {
+    const DEFAULT_PINGBACK_RESPONSE = 'OK';
+
     /**
      * Handle pingback
      * @return string
      */
     public function handlePingback()
     {
-        $result = '';
+        // Load paymentwall configs
+        Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
 
-        Paymentwall_Base::setApiType(Paymentwall_Base::API_GOODS);
-        Paymentwall_Base::setAppKey(Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_shop_id'));
-        Paymentwall_Base::setSecretKey(Mage::getStoreConfig('payment/paymentwall_pwlocal/paymentwall_secret'));
-        
         $pingback = new Paymentwall_Pingback($_GET, $_SERVER['REMOTE_ADDR']);
-        
+
         if ($pingback->validate()) {
             $order = Mage::getModel('sales/order')->loadByIncrementId($pingback->getProductId());
             if ($order->getId()) {
                 try {
                     $paymentModel = $order->getPayment()->getMethodInstance();
                     $paymentModel->setCurrentOrder($order)->processPendingPayment($pingback);
-                    $result = 'OK';
+                    $result = self::DEFAULT_PINGBACK_RESPONSE;
                 } catch (Exception $e) {
                     Mage::log($e->getMessage());
                     $result = 'Internal server error';
@@ -42,7 +41,7 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
             $result = $pingback->getErrorSummary();
         }
 
-        return $result;    
+        return $result;
     }
 
 

@@ -2,15 +2,39 @@
 <layout>
     <checkout_onepage_index>
         <reference name="head">
-            <block type="core/text" name="paymentwall_pwpayment_js">
-                <action method="setText" ifconfig="payment/paymentwall_pwpro/active">
-                    <text><![CDATA[<script src="http://api.paymentwall.com/pro/js/paymentwall.js"></script>]]></text>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>js/paymentwall.js</name>
+            </action>
+            <action method="addItem">
+                <type>skin_css</type>
+                <name>css/paymentwall.css</name>
+            </action>
+            <block type="core/text" name="brick.js">
+                <action method="setText">
+                    <text><![CDATA[<script src="//api.paymentwall.com/brick/brick.1.3.js"></script>]]></text>
                 </action>
             </block>
-            <action method="addItem" ifconfig="payment/paymentwall_pwpro/active">
-                <type>skin_js</type>
-                <name>js/paymentwall_pwpro.js</name>
-            </action>
         </reference>
     </checkout_onepage_index>
+
+    <!-- Layout settings for Paymentwall controller -->
+    <paymentwall_payment_pwlocal>
+        <reference name="head">
+            <action method="setTitle">
+                <title>Paymentwall Widget Checkout</title>
+            </action>
+        </reference>
+        <reference name="root">
+            <action method="setTemplate">
+                <template>page/2columns-right.phtml</template>
+            </action>
+        </reference>
+        <reference name="content">
+            <block type="paymentwall/checkout_form_method_pwlocal" name="paymentwall_widget"
+                   template="paymentwall/checkout/form/method/pwlocal.phtml">
+                <label>Paymentwall Widget Checkout</label>
+            </block>
+        </reference>
+    </paymentwall_payment_pwlocal>
 </layout>
