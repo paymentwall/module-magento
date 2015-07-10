@@ -25,7 +25,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
     /**
      * Prepare data for payment
-     * @param  Mage_Sales_Model_Order_Payment $payment
+     * @param $payment
      * @param $amount
      * @return $this
      */
@@ -33,6 +33,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
     {
         $order = $payment->getOrder();
         $info = $this->getInfoInstance();
+        $this->setCurrentOrder($order);
         return array(
             'email' => $order->getBillingAddress()->getEmail(),
             'amount' => $amount,
@@ -54,16 +55,14 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         if ($order) {
             $invoice = $order->prepareInvoice()
                 ->setTransactionId($order->getId())
-                ->addComment("Invoice created by PaymentWall Paymentwall module")
+                ->addComment("Invoice created by Paymentwall Brick")
                 ->register()
                 ->pay();
 
             $transactionSave = Mage::getModel('core/resource_transaction')
                 ->addObject($invoice)
                 ->addObject($invoice->getOrder());
-
             $transactionSave->save();
-            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true)->save();
         }
     }
 
@@ -76,6 +75,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
+
         $info = $this->getInfoInstance();
         $info->setCcType($data->getCcType())
             ->setCcOwner($data->getCcOwner())
@@ -83,9 +83,9 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
             ->setCcNumber($data->getCcNumber())
             ->setCcCid($data->getCcCid())
             ->setCcExpMonth($data->getCcExpMonth())
-            ->setCcExpYear($data->getCcExpYear());
+            ->setCcExpYear($data->getCcExpYear())
 
-        $info->setAdditionalInformation('brick_token', $data->getBrickToken())
+            ->setAdditionalInformation('brick_token', $data->getBrickToken())
             ->setAdditionalInformation('brick_fingerprint', $data->getBrickFingerprint());
 
         return $this;
@@ -94,7 +94,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
     /**
      * @param $payment
      * @param Varien_Object $amount
-     * @return Mage_Payment_Model_Abstract
+     * @return Mage_Payment_Model_Abstract|void
      * @throws Mage_Core_Exception
      */
     public function capture(Varien_Object $payment, $amount)
@@ -111,12 +111,13 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         if ($charge->isSuccessful()) {
             if ($charge->isCaptured()) {
                 // deliver a product
+
             } elseif ($charge->isUnderReview()) {
                 $payment->setIsTransactionPending(true);
             }
         } else {
-            $payment->setIsTransactionPending(true);
-            $payment->setIsFraudDetected(true);
+            $payment->setIsTransactionPending(true)
+                ->setIsFraudDetected(true);
             $errors = json_decode($response, true);
             $this->log($errors, 'Charge error response');
             $strErrors = Mage::helper('paymentwall')->__("Brick error(s):");

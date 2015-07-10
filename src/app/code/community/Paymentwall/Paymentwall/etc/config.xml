@@ -54,7 +54,7 @@
                 <title>Paymentwall Brick</title>
                 <model>paymentwall/method_pwbrick</model>
                 <active>1</active>
-                <order_status>pending</order_status>
+                <order_status>processing</order_status>
                 <payment_action>authorize_capture</payment_action>
                 <allowspecific>0</allowspecific>
             </paymentwall_pwbrick>

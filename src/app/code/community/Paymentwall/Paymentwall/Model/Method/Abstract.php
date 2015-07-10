@@ -101,7 +101,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
     {
         if ($this->getConfigData('debug_mode')) {
             if (!is_string($message)) {
-                $message = var_export($message);
+                $message = var_export($message, true);
             }
             $message = "\n/********** " . $this->getCode() . ($section ? " " . $section : "") . " **********/\n" . $message;
             Mage::log($message, null, $this->_logFile);
