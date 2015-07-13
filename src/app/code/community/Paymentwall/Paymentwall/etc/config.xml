@@ -43,7 +43,7 @@
     <default>
         <payment>
             <paymentwall_pwlocal>
-                <title>Paymentwall PW Local</title>
+                <title>Paymentwall</title>
                 <active>1</active>
                 <model>paymentwall/method_pwlocal</model>
                 <order_status>pending_payment</order_status>
@@ -51,7 +51,7 @@
                 <allowspecific>0</allowspecific>
             </paymentwall_pwlocal>
             <paymentwall_pwbrick>
-                <title>Paymentwall Brick</title>
+                <title>Credit Card</title>
                 <model>paymentwall/method_pwbrick</model>
                 <active>1</active>
                 <order_status>processing</order_status>
