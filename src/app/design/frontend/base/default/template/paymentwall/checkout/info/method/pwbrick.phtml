@@ -1,0 +1,10 @@
+<?php
+$info = $this->getData('info');
+$method = $this->getData('method');
+?>
+<?php if (!$this->getHideTitle()): ?>
+    <?php echo $this->escapeHtml($method->getConfigData('title')) ?><br/>
+<?php endif; ?>
+<span>
+    <?php echo $this->__('Card Number:') ?><br/><?php echo 'xxxx-xxxx-xxxx-' . $info->getCcLast4(); ?>
+</span>

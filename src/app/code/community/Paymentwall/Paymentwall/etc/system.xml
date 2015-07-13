@@ -9,7 +9,7 @@
                     <sort_order>103</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
-                    <show_in_store>0</show_in_store>
+                    <show_in_store>1</show_in_store>
                     <fields>
                         <active translate="label">
                             <label>Enabled</label>
@@ -28,30 +28,29 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </title>
-                        <paymentwall_shop_id translate="label">
+                        <paymentwall_public_key translate="label">
                             <label>Project Key</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </paymentwall_shop_id>
-                        <paymentwall_secret translate="label">
+                            <show_in_store>1</show_in_store>
+                        </paymentwall_public_key>
+                        <paymentwall_private_key translate="label">
                             <label>Secret Key</label>
                             <frontend_type>text</frontend_type>
-                            
                             <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </paymentwall_secret>
+                            <show_in_store>1</show_in_store>
+                        </paymentwall_private_key>
                         <paymentwall_widget_code translate="label">
                             <label>Widget Code</label>
                             <frontend_type>text</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
+                            <show_in_store>1</show_in_store>
                         </paymentwall_widget_code>
                         <paymentwall_url translate="label">
                             <label>Success URL</label>
@@ -70,10 +69,19 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </paymentwall_istest>
+                        <debug_mode translate="label">
+                            <label>Debug Mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </debug_mode>
                     </fields>
                 </paymentwall_pwlocal>
-                <paymentwall_pwpro translate="label" module="paymentwall">
-                    <label>Paymentwall PW Pro</label>
+                <paymentwall_pwbrick translate="label" module="paymentwall">
+                    <label>Paymentwall Brick</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>104</sort_order>
                     <show_in_default>1</show_in_default>
@@ -97,24 +105,33 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </title>
-                        <api_key translate="label">
-                            <label>API Key</label>
+                        <order_status translate="label">
+                            <label>New order status</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_order_status_processing</source_model>
+                            <sort_order>21</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </order_status>
+                        <paymentwall_public_key translate="label">
+                            <label>Public Key</label>
                             <frontend_type>text</frontend_type>
-                            <comment>Merchant API Key</comment>
+                            <comment>Merchant Public API Key</comment>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                        </api_key>
-                        <public_key translate="label">
-                            <label>Public Key</label>
-                            <frontend_type>textarea</frontend_type>
-                            <comment>Merchant Public Key</comment>
+                        </paymentwall_public_key>
+                        <paymentwall_private_key translate="label">
+                            <label>Private Key</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Merchant Private Key</comment>
                             <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                        </public_key>
+                        </paymentwall_private_key>
                         <allowspecific translate="label">
                             <label>Payment Applicable From</label>
                             <frontend_type>select</frontend_type>
@@ -124,8 +141,17 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </allowspecific>
+                        <debug_mode translate="label">
+                            <label>Debug Mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </debug_mode>
                     </fields>
-                </paymentwall_pwpro>
+                </paymentwall_pwbrick>
             </groups>
         </payment>
     </sections>

@@ -5,33 +5,12 @@
  * @package Paymentwall\ThirdpartyIntegration\Magento
  */
 
-if (!class_exists('Paymentwall_Base')) {
-    require_once dirname(
-            dirname(__FILE__)
-        ) . DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'paymentwall-php' . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'paymentwall.php';
-}
-
 /**
  * Class Paymentwall_Payment_PaymentController
  */
 class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Front_Action
 {
-    /**
-     * Get last order
-     */
-    protected function getOrder()
-    {
-        if (!$this->_order) {
-            $session = Mage::getSingleton('checkout/session');
-            $this->_order = $this->loadOrderById($session->getLastRealOrderId());
-        }
-        return $this->_order;
-    }
-
-    protected function loadOrderById($orderId)
-    {
-        return Mage::getModel('sales/order')->loadByIncrementId($orderId);
-    }
+    const ORDER_STATUS_AFTER_PINGBACK_SUCCESS = 'processing';
 
     /**
      * Action that handles pingback call from paymentwall system
@@ -39,26 +18,53 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
      */
     public function ipnAction()
     {
-        // we should get the data here via $_POST
-        $pingbackModel = Mage::getModel('paymentwall/pingback');
-        $result = $pingbackModel->handlePingback();
+        $result = Mage::getModel('paymentwall/pingback')->handlePingback();
         die($result);
     }
 
+    /**
+     * Show Paymentwall widget
+     * For Pw Local
+     */
     public function pwlocalAction()
     {
-        $order = $this->getOrder();
-        if ($order) {
-            try {
-                $model = Mage::getModel('paymentwall/method_pwlocal');
-                $model->initPaymentMethod($order);
-                $widget = $model->getPaymentWidget($order);
-                die($widget->getHtmlCode());
-            } catch (Exception $e) {
-                die($e->getMessage());
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Handle ajax payment listener on Widget page
+     * For Pw Local
+     */
+    public function ajaxPwlocalAction()
+    {
+        // Get current order id
+        $curOrderId = Mage::getSingleton('checkout/session')->getLastRealOrderId();
+        $response = array(
+            'status' => 0,
+            'url' => '',
+            'message' => ''
+        );
+
+        if ($curOrderId) {
+            $order = Mage::getModel('sales/order')->loadByIncrementId($curOrderId);
+            if ($order->getId()) {
+                $response['status'] = $order->getStatus() == self::ORDER_STATUS_AFTER_PINGBACK_SUCCESS
+                    ? 1 : 0;
+                // Get success page redirect url
+                $response['url'] = '';
+            } else {
+                $response['status'] = 2; // Error
+                $response['message'] = 'Order Invalid';
             }
-        } else {
-            die("wrong way"); //should redirect back to homepage
         }
+        if ($response['status'] == 1) {
+            $response['message'] = "<h3>{$this->__("Payment Processed")}</h3>";
+            // Clear shopping cart
+            Mage::getSingleton('checkout/cart')->truncate();
+        }
+
+        $this->getResponse()->clearHeaders()->setHeader('Content-type', 'application/json', true);
+        $this->getResponse()->setBody(json_encode($response));
     }
 }
