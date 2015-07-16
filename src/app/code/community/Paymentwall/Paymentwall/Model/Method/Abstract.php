@@ -57,25 +57,6 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
         }
     }
 
-    private function makeInvoice()
-    {
-        $order = $this->getCurrentOrder();
-        if ($order) {
-            $invoice = $order->prepareInvoice()
-                ->setTransactionId($order->getId())
-                ->addComment("Invoice created by PaymentWall Paymentwall module")
-                ->register()
-                ->pay();
-
-            $transactionSave = Mage::getModel('core/resource_transaction')
-                ->addObject($invoice)
-                ->addObject($invoice->getOrder());
-
-            $transactionSave->save();
-            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true)->save();
-        }
-    }
-
     /**
      * Init paymentwall configs
      */
@@ -91,6 +72,47 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
     public function getMethodCode()
     {
         return $this->_code;
+    }
+
+    /**
+     * @param $order
+     * @return array
+     */
+    protected function prepareUserProfile($order)
+    {
+        $billing = $order->getBillingAddress();
+        $data = array(
+            'customer[city]' => $billing->getCity(),
+            'customer[state]' => $billing->getRegion(),
+            'customer[address]' => $billing->getStreetFull(),
+            'customer[country]' => $billing->getCountry(),
+            'customer[zip]' => $billing->getPostcode(),
+        );
+
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+            // Load the customer's data
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+            $data = array_merge($data, array(
+                'customer[birthday]' => $customer->getDob() ? strtotime($customer->getDob()) : '',
+                'customer[sex]' => $customer->getGender() ? $customer->getGender() : '',
+                'customer[username]' => $customer->getEntityId(),
+                'customer[firstname]' => $customer->getFirstname(),
+                'customer[lastname]' => $customer->getLastname(),
+                'email' => $customer->getEmail(),
+                'history[registration_email]' => $customer->getEmail(),
+                'history[registration_email_verified]' => $customer->getIsActive(),
+                'history[registration_date]' => $customer->getCreatedAtTimestamp(),
+            ));
+        } else {
+            $data = array_merge($data, array(
+                'customer[username]' => $billing->getCustomerEmail(),
+                'customer[firstname]' => $billing->getFirstname(),
+                'customer[lastname]' => $billing->getLastname(),
+                'email' => $billing->getEmail()
+            ));
+        }
+
+        return $data;
     }
 
     /**

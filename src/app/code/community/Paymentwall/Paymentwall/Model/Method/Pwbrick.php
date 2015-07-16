@@ -25,45 +25,22 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
     /**
      * Prepare data for payment
-     * @param $payment
-     * @param $amount
+     * @param  $payment
      * @return $this
      */
-    public function prepareCardInfo($payment, $amount)
+    public function prepareCardInfo($payment)
     {
         $order = $payment->getOrder();
         $info = $this->getInfoInstance();
         $this->setCurrentOrder($order);
         return array(
             'email' => $order->getBillingAddress()->getEmail(),
-            'amount' => $amount,
+            'amount' => $order->getGrandTotal(),
             'currency' => $order->getOrderCurrencyCode(),
             'token' => $info->getAdditionalInformation('brick_token'),
             'fingerprint' => $info->getAdditionalInformation('brick_fingerprint'),
             'description' => 'Order #' . $order->getIncrementId(),
         );
-    }
-
-
-    /**
-     * Make invoice for paid order
-     * @return void
-     */
-    protected function makeInvoice()
-    {
-        $order = $this->getCurrentOrder();
-        if ($order) {
-            $invoice = $order->prepareInvoice()
-                ->setTransactionId($order->getId())
-                ->addComment("Invoice created by Paymentwall Brick")
-                ->register()
-                ->pay();
-
-            $transactionSave = Mage::getModel('core/resource_transaction')
-                ->addObject($invoice)
-                ->addObject($invoice->getOrder());
-            $transactionSave->save();
-        }
     }
 
     /**
@@ -99,10 +76,12 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      */
     public function capture(Varien_Object $payment, $amount)
     {
-        $cardInfo = $this->prepareCardInfo($payment, $amount);
         $this->initPaymentwallConfig();
         $charge = new Paymentwall_Charge();
-        $charge->create($cardInfo);
+        $charge->create(array_merge(
+            $this->prepareUserProfile($payment->getOrder()), // for User Profile API
+            $this->prepareCardInfo($payment)
+        ));
         $response = $charge->getPublicData();
 
         // Debug

@@ -24,6 +24,10 @@
             <action method="setTitle">
                 <title>Paymentwall Widget Checkout</title>
             </action>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>js/paymentwall.js</name>
+            </action>
         </reference>
         <reference name="root">
             <action method="setTemplate">
