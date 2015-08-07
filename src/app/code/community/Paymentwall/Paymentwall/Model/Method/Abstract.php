@@ -42,6 +42,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
         $order = $this->getCurrentOrder();
         if ($order->getState() === Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW || $order->getState() === Mage_Sales_Model_Order::STATE_NEW) {
             if ($pingback->isDeliverable()) {
+                $this->callDeliveryApi($pingback->getReferenceId());
                 $this->makeInvoice();
             } elseif ($pingback->isCancelable()) {
                 $reason = $pingback->getParameter('reason');
@@ -78,7 +79,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
      * @param $order
      * @return array
      */
-    protected function prepareUserProfile($order)
+    protected function prepareUserProfile(Mage_Sales_Model_Order $order)
     {
         $billing = $order->getBillingAddress();
         $data = array(
@@ -105,14 +106,54 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
             ));
         } else {
             $data = array_merge($data, array(
-                'customer[username]' => $billing->getCustomerEmail(),
+                'customer[username]' => $billing->getEmail(),
                 'customer[firstname]' => $billing->getFirstname(),
                 'customer[lastname]' => $billing->getLastname(),
-                'email' => $billing->getEmail()
             ));
         }
 
         return $data;
+    }
+
+    public function callDeliveryApi($ref)
+    {
+        $this->initPaymentwallConfig();
+        if ($this->getConfigData('paymentwall_delivery')) {
+            $delivery = new Paymentwall_GenerericApiObject('delivery');
+            $response = $delivery->post($this->prepareDeliveryData($this->getCurrentOrder(), $ref));
+        }
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @param $ref
+     * @return array
+     */
+    private function prepareDeliveryData(Mage_Sales_Model_Order $order, $ref)
+    {
+        $billing = $order->getBillingAddress();
+        $shipping = $order->getShippingAddress();
+
+        return array(
+            'payment_id' => $ref,
+            'type' => 'digital',
+            'status' => 'delivered',
+            'estimated_delivery_datetime' => date('Y/m/d H:i:s'),
+            'estimated_update_datetime' => date('Y/m/d H:i:s'),
+            'refundable' => 'yes',
+            'details' => 'Item will be delivered via email by ' . date('Y/m/d H:i:s'),
+            'shipping_address[email]' => $billing->getEmail(),
+            'shipping_address[firstname]' => $shipping->getFirstname(),
+            'shipping_address[lastname]' => $shipping->getLastname(),
+            'shipping_address[country]' => $shipping->getCountry(),
+            'shipping_address[street]' => $shipping->getStreetFull(),
+            'shipping_address[state]' => $shipping->getRegion(),
+            'shipping_address[phone]' => $shipping->getTelephone(),
+            'shipping_address[zip]' => $shipping->getPostcode(),
+            'shipping_address[city]' => $shipping->getCity(),
+            'reason' => 'none',
+            'is_test' => $this->getConfigData('paymentwall_istest') ? 1 : 0,
+        );
     }
 
     /**

@@ -51,7 +51,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
      * @param $order
      * @return Paymentwall_Widget
      */
-    public function getPaymentWidget($order)
+    public function getPaymentWidget(Mage_Sales_Model_Order $order)
     {
         $this->initPaymentwallConfig();
 

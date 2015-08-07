@@ -27,27 +27,31 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
             if ($order->getId()) {
                 try {
                     if ($pingback->isDeliverable()) {
+
                         $paymentModel = $order->getPayment()->getMethodInstance();
-                        $paymentModel->setCurrentOrder($order)->processPendingPayment($pingback);
-                        $result = self::DEFAULT_PINGBACK_RESPONSE;
+                        $paymentModel->setCurrentOrder($order)
+                            ->processPendingPayment($pingback);
+
+                        return self::DEFAULT_PINGBACK_RESPONSE;
                     } elseif ($pingback->isCancelable()) {
                         $order->registerCancellation(Mage::helper('sales')->__('Order marked as cancelled by Paymentwall.'))
                             ->save();
-                        $result = Mage::helper('sales')->__('Order marked as cancelled by Paymentwall.');
+                        return Mage::helper('sales')->__('Order marked as cancelled by Paymentwall.');
                     }
                 } catch (Exception $e) {
                     Mage::log($e->getMessage());
                     $result = 'Internal server error';
                     $result .= ' ' . $e->getMessage();
+                    return $result;
                 }
             } else {
-                $result = 'Invalid order';
+                return 'Invalid order';
             }
         } else {
-            $result = $pingback->getErrorSummary();
+            return $pingback->getErrorSummary();
         }
 
-        return $result;
+        return '';
     }
 
 
