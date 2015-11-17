@@ -54,15 +54,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         }
 
         $info = $this->getInfoInstance();
-        $info->setCcType($data->getCcType())
-            ->setCcOwner($data->getCcOwner())
-            ->setCcLast4(substr($data->getCcNumber(), -4))
-            ->setCcNumber($data->getCcNumber())
-            ->setCcCid($data->getCcCid())
-            ->setCcExpMonth($data->getCcExpMonth())
-            ->setCcExpYear($data->getCcExpYear())
-
-            ->setAdditionalInformation('brick_token', $data->getBrickToken())
+        $info->setAdditionalInformation('brick_token', $data->getBrickToken())
             ->setAdditionalInformation('brick_fingerprint', $data->getBrickFingerprint());
 
         return $this;
@@ -90,7 +82,6 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         if ($charge->isSuccessful()) {
             if ($charge->isCaptured()) {
                 // deliver a product
-
             } elseif ($charge->isUnderReview()) {
                 $payment->setIsTransactionPending(true);
             }

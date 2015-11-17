@@ -3,7 +3,7 @@
         <label for="paymentwall_pwbrick_cc_type" class="required"><em>*</em><?php echo $this->__('Card Type') ?></label>
 
         <div class="input-box">
-            <select id="paymentwall_pwbrick_cc_type" name="payment[cc_type]"
+            <select id="paymentwall_pwbrick_cc_type"
                     title="<?php echo $this->__('Card Type') ?>"
                     class="required-entry validate-cc-type-select">
                 <option value=""><?php echo $this->__('--Please Select--') ?></option>
@@ -24,7 +24,7 @@
         </label>
 
         <div class="input-box">
-            <input name="payment[cc_number]" type="text" autocomplete="off" id="paymentwall_pwbrick_cc_number"
+            <input type="text" autocomplete="off" id="paymentwall_pwbrick_cc_number"
                    class="input-text validate-cc-number validate-cc-type" data-brick="card-number"/>
         </div>
     </li>
@@ -35,10 +35,10 @@
         </label>
 
         <div class="input-box">
-            <input name="payment[cc_exp_month]" type="text" id="paymentwall_pwbrick_expiration" autocomplete="off"
+            <input type="text" id="paymentwall_pwbrick_expiration" autocomplete="off"
                    class="month validate-cc-exp required-entry" data-brick="card-expiration-month" placeholder="MM"
                    maxlength="2" size="2"/> /
-            <input name="payment[cc_exp_year]" type="text" id="paymentwall_pwbrick_expiration_yr" autocomplete="off"
+            <input type="text" id="paymentwall_pwbrick_expiration_yr" autocomplete="off"
                    class="year required-entry" data-brick="card-expiration-year" placeholder="YY" maxlength="4"
                    size="4"/>
         </div>
@@ -50,7 +50,7 @@
         </label>
 
         <div class="input-box">
-            <input name="payment[cc_cid]" type="text" id="paymentwall_pwbrick_cc_cid" autocomplete="off"
+            <input type="text" id="paymentwall_pwbrick_cc_cid" autocomplete="off"
                    class="input-text cvv required-entry validate-cc-cvn"
                    data-brick="card-cvv" maxlength="4"/>
         </div>
