@@ -1,4 +1,5 @@
 var PW = {
+    "rewritePayment": false,
     "initPwBrick": function (publicKey) {
         return new Brick({
             public_key: publicKey,
@@ -56,10 +57,18 @@ var PW = {
     },
     "rewriteSavePayment": function (brick) {
 
+        // Check second load
+        if (this.rewritePayment) {
+            return false;
+        }
+
+        this.rewritePayment = true;
         Payment.prototype.save = Payment.prototype.save.wrap(function (origin_save) {
             if ($('p_method_paymentwall_pwbrick').checked) {
+
                 // Check payment method selected
                 var validator = new Validation(this.form);
+
                 if (this.validate() && validator.validate()) {
                     brick.tokenizeCard(
                         PW.prepareBrickData(),
