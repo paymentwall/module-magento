@@ -11,16 +11,15 @@ if (!class_exists('Paymentwall_Config'))
 /**
  * Class Paymentwall_Paymentwall_Model_Method_Abstract
  */
-class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract
-{
+class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract {
+    
     protected $_code;
     protected $_logFile = 'paymentwall.log';
 
     /**
      * @param string $code
      */
-    public function __construct($code = '')
-    {
+    public function __construct($code = '') {
         if ($code) {
             $this->_code = 'paymentwall_' . $code;
         }
@@ -30,39 +29,10 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
         $this->setData('original_code', $code);
     }
 
-
-    /**
-     * Process pending payment
-     * @param Paymentwall_Pingback $pingback
-     * @throws Exception
-     * @return void
-     */
-    public function processPendingPayment(Paymentwall_Pingback $pingback)
-    {
-        $order = $this->getCurrentOrder();
-        if ($order->getState() === Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW || $order->getState() === Mage_Sales_Model_Order::STATE_NEW) {
-            if ($pingback->isDeliverable()) {
-                $this->callDeliveryApi($pingback->getReferenceId());
-                $this->makeInvoice();
-            } elseif ($pingback->isCancelable()) {
-                $reason = $pingback->getParameter('reason');
-                $order->setState(
-                    Mage_Sales_Model_Order::STATE_CANCELED,
-                    $reason == self::REASON_ORDER_FRAUD || $reason == self::REASON_CC_FRAUD ? Mage_Sales_Model_Order::STATUS_FRAUD : true
-                );
-                $order->save();
-            }
-        } else {
-            $incrementId = $order->getIncrementId();
-            throw new Exception("This order {$incrementId} is not put in PENDING REVIEW STATE", 1);
-        }
-    }
-
     /**
      * Init paymentwall configs
      */
-    public function initPaymentwallConfig()
-    {
+    public function initPaymentwallConfig() {
         Paymentwall_Config::getInstance()->set(array(
             'api_type' => Paymentwall_Config::API_GOODS,
             'public_key' => $this->getConfigData('paymentwall_public_key'),
@@ -70,8 +40,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
         ));
     }
 
-    public function getMethodCode()
-    {
+    public function getMethodCode() {
         return $this->_code;
     }
 
@@ -79,8 +48,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
      * @param $order
      * @return array
      */
-    protected function prepareUserProfile(Mage_Sales_Model_Order $order)
-    {
+    protected function prepareUserProfile(Mage_Sales_Model_Order $order) {
         $billing = $order->getBillingAddress();
         $data = array(
             'customer[city]' => $billing->getCity(),
@@ -115,8 +83,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
         return $data;
     }
 
-    public function callDeliveryApi($ref)
-    {
+    public function callDeliveryApi($ref) {
         $this->initPaymentwallConfig();
         if ($this->getConfigData('paymentwall_delivery')) {
             $delivery = new Paymentwall_GenerericApiObject('delivery');
@@ -129,8 +96,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
      * @param $ref
      * @return array
      */
-    private function prepareDeliveryData(Mage_Sales_Model_Order $order, $ref)
-    {
+    private function prepareDeliveryData(Mage_Sales_Model_Order $order, $ref) {
         $billing = $order->getBillingAddress();
         $shipping = $order->getShippingAddress();
 
@@ -157,11 +123,31 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
     }
 
     /**
+     * Make invoice for paid order
+     * @return void
+     */
+    public function makeInvoice() {
+        $order = $this->getCurrentOrder();
+        if ($order) {
+            $invoice = $order->prepareInvoice()
+                ->setTransactionId($order->getId())
+                ->addComment("Invoice created by Paymentwall")
+                ->register()
+                ->pay();
+
+            $transactionSave = Mage::getModel('core/resource_transaction')
+                ->addObject($invoice)
+                ->addObject($invoice->getOrder());
+            $transactionSave->save();
+            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true)->save();
+        }
+    }
+
+    /**
      * Log Function
      * @param $message
      */
-    public function log($message, $section = '')
-    {
+    public function log($message, $section = '') {
         if ($this->getConfigData('debug_mode')) {
             if (!is_string($message)) {
                 $message = var_export($message, true);
