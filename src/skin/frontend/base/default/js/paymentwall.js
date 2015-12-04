@@ -75,7 +75,7 @@ var PW = {
                         function (response) {
                             // handle errors
                             if (response.type == 'Error') {
-                                alert("Brick Error:\nCode [" + response.code + "]: " + response.error);
+                                alert("Brick Error(s):\nCode [" + response.code + "]: " + response.error);
                                 return false;
                             } else {
                                 $('paymentwall_pwbrick_token').value = response.token;
