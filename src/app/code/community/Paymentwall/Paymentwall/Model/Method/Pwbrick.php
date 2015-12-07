@@ -70,10 +70,20 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
         $this->initPaymentwallConfig();
 
+        $customerId = $_SERVER['REMOTE_ADDR'];
+
+        if(Mage::getSingleton('customer/session')->isLoggedIn()){
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+            $customerId = $customer->getId();
+        }
+
         $charge = new Paymentwall_Charge();
         $charge->create(array_merge(
             $this->prepareUserProfile($payment->getOrder()), // for User Profile API
-            $this->prepareCardInfo($payment)
+            $this->prepareCardInfo($payment),
+            array(
+                'uid' => $customerId // for Pingback Request
+            )
         ));
         $response = $charge->getPublicData();
 

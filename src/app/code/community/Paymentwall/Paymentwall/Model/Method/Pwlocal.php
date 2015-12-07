@@ -29,8 +29,15 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
     public function getPaymentWidget(Mage_Sales_Model_Order $order) {
         $this->initPaymentwallConfig();
 
+        $customerId = $_SERVER['REMOTE_ADDR'];
+
+        if(Mage::getSingleton('customer/session')->isLoggedIn()){
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+            $customerId = $customer->getId();
+        }
+
         $widget = new Paymentwall_Widget(
-            $order->getCustomerEmail(),
+            $customerId,
             $this->getConfigData('paymentwall_widget_code'),
             array(
                 new Paymentwall_Product(
