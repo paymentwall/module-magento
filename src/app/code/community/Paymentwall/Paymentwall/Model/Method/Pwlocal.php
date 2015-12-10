@@ -5,9 +5,15 @@
  * @package Paymentwall\ThirdpartyIntegration\Magento\Model\Method
  */
 class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwall_Model_Method_Abstract {
-    protected $_isGateway = true;
+
+    protected $_isInitializeNeeded = false;
     protected $_canUseInternal = false;
     protected $_canUseForMultishipping = false;
+    protected $_canCapture = true;
+    protected $_canAuthorize = true;
+    protected $_canVoid = false;
+    protected $_canReviewPayment = false;
+    protected $_canCreateBillingAgreement = false;
 
     /**
      * Constructor method.

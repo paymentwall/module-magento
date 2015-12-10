@@ -12,7 +12,7 @@ if (!class_exists('Paymentwall_Config'))
  * Class Paymentwall_Paymentwall_Model_Method_Abstract
  */
 class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract {
-    
+
     protected $_code;
     protected $_logFile = 'paymentwall.log';
 
@@ -124,22 +124,46 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
 
     /**
      * Make invoice for paid order
-     * @return void
+     * @param $pingback
+     * @throws Exception
+     * @throws bool
      */
-    public function makeInvoice() {
+    public function makeInvoice($pingback) {
         $order = $this->getCurrentOrder();
+        $payment = $order->getPayment();
+
         if ($order) {
             $invoice = $order->prepareInvoice()
-                ->setTransactionId($order->getId())
+                ->setTransactionId($pingback->getReferenceId())
                 ->addComment("Invoice created by Paymentwall")
-                ->register()
-                ->pay();
+                ->register();
 
-            $transactionSave = Mage::getModel('core/resource_transaction')
-                ->addObject($invoice)
-                ->addObject($invoice->getOrder());
-            $transactionSave->save();
-            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true)->save();
+            $this->payInvoice($pingback, $invoice);
+        }
+    }
+
+    /**
+     * @param $pingback
+     * @param $invoice
+     */
+    public function payInvoice($pingback, $invoice) {
+        $order = $this->getCurrentOrder();
+        $payment = $order->getPayment();
+
+        if ($order) {
+            $payment->setTransactionId($pingback->getReferenceId())
+                ->setCurrencyCode($order->getOrderCurrencyCode())
+                ->setPreparedMessage('Payment approved by Paymentwall')
+                ->setShouldCloseParentTransaction(true)
+                ->setIsTransactionClosed(0)
+                ->registerCaptureNotification($invoice->getGrandTotal())
+                ->save();
+
+            $invoice->pay();
+
+            $order->sendNewOrderEmail()
+                ->setEmailSent(true)
+                ->save();
         }
     }
 
