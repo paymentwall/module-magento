@@ -8,13 +8,14 @@
  */
 class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwall_Model_Method_Abstract implements Mage_Payment_Model_Recurring_Profile_MethodInterface {
 
-    const MAX_LENGTH_OF_INTERNAL_REFERENCE_ID = 127;
-
     protected $_isInitializeNeeded = false;
     protected $_canUseInternal = false;
     protected $_canUseForMultishipping = false;
     protected $_canCapture = true;
-    protected $_canAuthorize = true;
+    protected $_canAuthorize = false;
+    protected $_canVoid = false;
+    protected $_canReviewPayment = false;
+    protected $_canCreateBillingAgreement = false;
 
     /**
      * Constructor method.
@@ -72,10 +73,12 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
         $customerId = $_SERVER['REMOTE_ADDR'];
 
-        if(Mage::getSingleton('customer/session')->isLoggedIn()){
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $customer = Mage::getSingleton('customer/session')->getCustomer();
             $customerId = $customer->getId();
         }
+
+        $payment->setAmount($amount);
 
         $charge = new Paymentwall_Charge();
         $charge->create(array_merge(
@@ -92,7 +95,12 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
         if ($charge->isSuccessful()) {
             if ($charge->isCaptured()) {
-                // deliver a product
+
+                $payment->setTransactionId($charge->getId());
+                $payment->setIsTransactionClosed(0);
+
+                // store token data
+                $payment->setTransactionAdditionalInfo('saved_token', Mage::helper('core')->encrypt($charge->getCard()->getToken()));
             } elseif ($charge->isUnderReview()) {
                 $payment->setIsTransactionPending(true);
             }
@@ -105,6 +113,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
             $strErrors .= "\n - Code #{$errors['error']['code']}: " . Mage::helper('paymentwall')->__($errors['error']['message']);
             Mage::throwException($strErrors);
         }
+
+        return $this;
     }
 
     /**
@@ -114,16 +124,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @throws Mage_Core_Exception
      */
     public function validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile) {
-        $errors = array();
-        $refId = $profile->getInternalReferenceId(); // up to 127 single-byte alphanumeric
 
-        if (strlen($refId) > self::MAX_LENGTH_OF_INTERNAL_REFERENCE_ID) { //  || !preg_match('/^[a-z\d\s]+$/i', $refId)
-            $errors[] = Mage::helper('paymentwall')->__('Merchant reference ID format is not supported.');
-        }
-
-        if ($errors) {
-            Mage::throwException(implode(' ', $errors));
-        }
     }
 
     /**
@@ -131,35 +132,34 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      *
      * @param Mage_Payment_Model_Recurring_Profile $profile
      * @param Mage_Payment_Model_Info $paymentInfo
+     * @throws Mage_Exception
      */
     public function submitRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile, Mage_Payment_Model_Info $paymentInfo) {
 
         $this->initPaymentwallConfig();
-
         $quote = Mage::getSingleton('checkout/session')->getQuote();
 
         $subscriptionData = $this->prepareSubscriptionData($profile, $quote);
-
         $paymentwallSubscription = new Paymentwall_Subscription();
-
         $paymentwallSubscription->create($subscriptionData);
 
         $response = json_decode($paymentwallSubscription->GetRawResponseData());
-
         $this->log($response, 'Subscription Response Data');
 
         if ($paymentwallSubscription->isSuccessful() && $response->object == 'subscription') {
-            $profile->setReferenceId($response->id);
 
+            $profile->setReferenceId($response->id);
             if ($response->active) {
                 $profile->setState(Mage_Sales_Model_Recurring_Profile::STATE_ACTIVE);
             } else {
                 $profile->setState(Mage_Sales_Model_Recurring_Profile::STATE_PENDING);
             }
+            $profile->save();
         } else {
+            $error = json_decode($paymentwallSubscription->getPublicData());
             $profile->setState(Mage_Sales_Model_Recurring_Profile::STATE_UNKNOWN);
+            $profile->save();
         }
-
     }
 
     /**
@@ -173,7 +173,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
         return array_merge(
             array(
-                'token' => $post['brick_token'],
+                'token' => $post['brick_token'], // Onetime token
                 'amount' => $profile->getBillingAmount(),
                 'currency' => $profile->getCurrencyCode(),
                 'email' => $quote->getBillingAddress()->getEmail(),
@@ -198,7 +198,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         }
 
         return array(
-            'trial[amount]' => $profile->getInitAmount(),
+            'trial[amount]' => $profile->getTrialBillingAmount() ? $profile->getTrialBillingAmount() : 0,
             'trial[currency]' => $profile->getCurrencyCode(),
             'trial[period]' => $profile->getTrialPeriodUnit(),
             'trial[period_duration]' => $profile->getTrialPeriodFrequency(),
