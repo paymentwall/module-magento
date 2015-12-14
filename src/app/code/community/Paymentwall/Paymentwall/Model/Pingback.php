@@ -77,6 +77,10 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
             try {
                 if ($pingback->isDeliverable()) {
 
+                    if($order->getState() == Mage_Sales_Model_Order::STATE_PROCESSING){
+                        return self::DEFAULT_PINGBACK_RESPONSE;
+                    }
+
                     $paymentModel = $payment->getMethodInstance();
                     $paymentModel->setCurrentOrder($order)
                         ->callDeliveryApi($pingback->getReferenceId());

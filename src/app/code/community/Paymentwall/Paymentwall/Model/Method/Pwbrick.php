@@ -31,9 +31,12 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @return array
      */
     public function prepareCardInfo($payment) {
+
         $order = $payment->getOrder();
         $info = $this->getInfoInstance();
+
         $this->setCurrentOrder($order);
+
         return array(
             'email' => $order->getBillingAddress()->getEmail(),
             'amount' => $order->getGrandTotal(),
@@ -50,6 +53,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @return mixed
      */
     public function assignData($data) {
+
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
@@ -71,25 +75,16 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
         $this->initPaymentwallConfig();
 
-        $customerId = $_SERVER['REMOTE_ADDR'];
-
-        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
-            $customer = Mage::getSingleton('customer/session')->getCustomer();
-            $customerId = $customer->getId();
-        }
-
         $payment->setAmount($amount);
 
         $charge = new Paymentwall_Charge();
         $charge->create(array_merge(
-            $this->prepareUserProfile($payment->getOrder()), // for User Profile API
             $this->prepareCardInfo($payment),
-            array(
-                'uid' => $customerId // for Pingback Request
-            )
+            $this->prepareUserProfile($payment->getOrder()), // for User Profile API
+            $this->getExtraData()
         ));
-        $response = $charge->getPublicData();
 
+        $response = $charge->getPublicData();
         // Debug
         $this->log($response, 'Charge response');
 
@@ -131,17 +126,20 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * Submit to the gateway
      *
      * @param Mage_Payment_Model_Recurring_Profile $profile
-     * @param Mage_Payment_Model_Info $paymentInfo
-     * @throws Mage_Exception
+     * @param Mage_Payment_Model_Info $payment
+     * @throws Exception
      */
-    public function submitRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile, Mage_Payment_Model_Info $paymentInfo) {
+    public function submitRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile, Mage_Payment_Model_Info $payment) {
 
         $this->initPaymentwallConfig();
         $quote = Mage::getSingleton('checkout/session')->getQuote();
 
-        $subscriptionData = $this->prepareSubscriptionData($profile, $quote);
         $paymentwallSubscription = new Paymentwall_Subscription();
-        $paymentwallSubscription->create($subscriptionData);
+        $paymentwallSubscription->create(array_merge(
+            $this->prepareSubscriptionData($profile, $quote),
+            $this->prepareUserProfile($payment->getOrder()),
+            $this->getExtraData()
+        ));
 
         $response = json_decode($paymentwallSubscription->GetRawResponseData());
         $this->log($response, 'Subscription Response Data');
@@ -156,7 +154,6 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
             }
             $profile->save();
         } else {
-            $error = json_decode($paymentwallSubscription->getPublicData());
             $profile->setState(Mage_Sales_Model_Recurring_Profile::STATE_UNKNOWN);
             $profile->save();
         }
@@ -247,12 +244,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      *
      * @param Mage_Payment_Model_Recurring_Profile $profile
      */
-    /**
-     * Manage status
-     *
-     * @param Mage_Payment_Model_Recurring_Profile $profile
-     */
     public function updateRecurringProfileStatus(Mage_Payment_Model_Recurring_Profile $profile) {
+
         $this->initPaymentwallConfig();
 
         $paymentwallSubscription = new Paymentwall_Subscription($profile->getReferenceId());
@@ -260,5 +253,19 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         if ($profile->getNewState() == Mage_Sales_Model_Recurring_Profile::STATE_CANCELED) {
             $paymentwallSubscription->cancel();
         }
+    }
+
+    public function getExtraData() {
+
+        $customerId = $_SERVER['REMOTE_ADDR'];
+        if (Mage::getSingleton('customer/session')->isLoggedIn()) {
+            $customer = Mage::getSingleton('customer/session')->getCustomer();
+            $customerId = $customer->getId();
+        }
+
+        return array(
+            'custom[integration_module]' => 'magento',
+            'uid' => $customerId
+        );
     }
 }

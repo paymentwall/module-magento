@@ -130,15 +130,24 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
      */
     public function makeInvoice($pingback) {
         $order = $this->getCurrentOrder();
-        $payment = $order->getPayment();
-
         if ($order) {
-            $invoice = $order->prepareInvoice()
-                ->setTransactionId($pingback->getReferenceId())
-                ->addComment("Invoice created by Paymentwall")
-                ->register();
 
-            $this->payInvoice($pingback, $invoice);
+            $payment = $order->getPayment();
+            $payment->setTransactionId($pingback->getReferenceId())
+                ->setPreparedMessage('Invoice created by Paymentwall module')
+                ->setShouldCloseParentTransaction(true)
+                ->setIsTransactionClosed(0)
+                ->capture(null);
+            $order->save();
+
+            // notify customer
+            $invoice = $payment->getCreatedInvoice();
+            if ($invoice && !$order->getEmailSent()) {
+                $order->sendNewOrderEmail()
+                    ->addStatusHistoryComment(Mage::helper('paymentwall')->__('Notified customer about invoice #%s.', $invoice->getIncrementId()))
+                    ->setIsCustomerNotified(true)
+                    ->save();
+            }
         }
     }
 
@@ -146,24 +155,34 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
      * @param $pingback
      * @param $invoice
      */
-    public function payInvoice($pingback, $invoice) {
+    public function payInvoice(Paymentwall_Pingback $pingback, Mage_Sales_Model_Order_Invoice $invoice) {
         $order = $this->getCurrentOrder();
-        $payment = $order->getPayment();
-
         if ($order) {
+            $payment = $order->getPayment();
+            $message = Mage::helper('sales')->__('Captured amount of %s online.', $order->getBaseCurrency()->formatTxt($invoice->getBaseGrandTotal()));
+
+            $invoice->setTransactionId($pingback->getReferenceId())
+                ->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE);
+            $invoice->getOrder()->setIsInProcess(true);
+            $invoice->getOrder()->addStatusHistoryComment($message)->setIsCustomerNotified(true);
+
             $payment->setTransactionId($pingback->getReferenceId())
+                ->setLastTransId($pingback->getReferenceId())
                 ->setCurrencyCode($order->getOrderCurrencyCode())
                 ->setPreparedMessage('Payment approved by Paymentwall')
                 ->setShouldCloseParentTransaction(true)
                 ->setIsTransactionClosed(0)
-                ->registerCaptureNotification($invoice->getGrandTotal())
-                ->save();
-
+                ->registerCaptureNotification();
             $invoice->pay();
+            $order->setState('processing', true, "Payment has been received", false)->save();
 
-            $order->sendNewOrderEmail()
-                ->setEmailSent(true)
-                ->save();
+            // notify customer
+            if ($invoice && !$order->getEmailSent()) {
+                $order->sendNewOrderEmail()
+                    ->addStatusHistoryComment(Mage::helper('paymentwall')->__('Notified customer about invoice #%s.', $invoice->getIncrementId()))
+                    ->setIsCustomerNotified(true)
+                    ->save();
+            }
         }
     }
 
@@ -182,6 +201,3 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
     }
 
 }
-
-    
-    
