@@ -77,7 +77,10 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
             try {
                 if ($pingback->isDeliverable()) {
 
-                    if($order->getState() == Mage_Sales_Model_Order::STATE_PROCESSING){
+                    if(
+                        $order->getState() == Mage_Sales_Model_Order::STATE_PROCESSING
+                        || $order->getState() == Mage_Sales_Model_Order::STATE_COMPLETE
+                    ){
                         return self::DEFAULT_PINGBACK_RESPONSE;
                     }
 
