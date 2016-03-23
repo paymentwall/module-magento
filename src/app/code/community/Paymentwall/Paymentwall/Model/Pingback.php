@@ -7,14 +7,16 @@ if (!class_exists('Paymentwall_Config'))
  * @author Paymentwall Inc <devsupport@paymentwall.com>
  * @package Paymentwall\ThirdpartyIntegration\Magento
  */
-class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
+class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
+{
     const DEFAULT_PINGBACK_RESPONSE = 'OK';
 
     /**
      * Handle pingback
      * @return string
      */
-    public function handlePingback() {
+    public function handlePingback()
+    {
         // Load paymentwall configs
         Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
 
@@ -37,7 +39,8 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
      * @param Paymentwall_Pingback $pingback
      * @return string
      */
-    protected function processPingbackRecurringProfile(Paymentwall_Pingback $pingback) {
+    protected function processPingbackRecurringProfile(Paymentwall_Pingback $pingback)
+    {
         $recurringProfile = Mage::getModel('sales/recurring_profile')->loadByInternalReferenceId($pingback->getProductId());
 
         if ($recurringProfile->getId()) {
@@ -64,7 +67,8 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
      * @param Paymentwall_Pingback $pingback
      * @return string
      */
-    protected function processPingbackOrder(Paymentwall_Pingback $pingback) {
+    protected function processPingbackOrder(Paymentwall_Pingback $pingback)
+    {
         $order = Mage::getModel('sales/order')->loadByIncrementId($pingback->getProductId());
         if ($order->getId()) {
 
@@ -76,11 +80,10 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
 
             try {
                 if ($pingback->isDeliverable()) {
-
-                    if(
+                    if (
                         $order->getState() == Mage_Sales_Model_Order::STATE_PROCESSING
                         || $order->getState() == Mage_Sales_Model_Order::STATE_COMPLETE
-                    ){
+                    ) {
                         return self::DEFAULT_PINGBACK_RESPONSE;
                     }
 
@@ -89,15 +92,14 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
                         ->callDeliveryApi($pingback->getReferenceId());
 
                     if ($invoice->getId()) {
-                        $paymentModel->payInvoice($pingback, $invoice);
+                        $paymentModel->payInvoice($pingback->getReferenceId(), $invoice);
                     } else {
-                        $paymentModel->makeInvoice($pingback);
+                        $paymentModel->makeInvoice($pingback->getReferenceId());
                     }
 
                 } elseif ($pingback->isCancelable()) {
-
                     $payment->cancel()->save();
-                    if($invoice->getId()){
+                    if ($invoice->getId()) {
                         $invoice->cancel();
                         $order->setIsInProcess(true);
                         $transactionSave = Mage::getModel('core/resource_transaction')
@@ -129,7 +131,8 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract {
      * @param Paymentwall_Pingback $pingback
      * @return bool
      */
-    protected function isRecurring(Paymentwall_Pingback $pingback) {
+    protected function isRecurring(Paymentwall_Pingback $pingback)
+    {
         return $pingback->getProductPeriodLength() > 0;
     }
 }

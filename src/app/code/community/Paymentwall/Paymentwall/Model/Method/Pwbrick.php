@@ -6,7 +6,8 @@
  *
  * Class Paymentwall_Paymentwall_Model_Method_Pwbrick
  */
-class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwall_Model_Method_Abstract implements Mage_Payment_Model_Recurring_Profile_MethodInterface {
+class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwall_Model_Method_Abstract implements Mage_Payment_Model_Recurring_Profile_MethodInterface
+{
 
     protected $_isInitializeNeeded = false;
     protected $_canUseInternal = false;
@@ -21,8 +22,21 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * Constructor method.
      * Set some internal properties
      */
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct('pwbrick');
+    }
+
+    /**
+     * @return null|string
+     * @return null|string
+     */
+    public function getOrderPlaceRedirectUrl()
+    {
+        if (!Mage::getModel('core/session')->getHas3DS()) {
+            return null;
+        }
+        return Mage::getUrl('paymentwall/payment/threeds', array('_secure' => true));
     }
 
     /**
@@ -30,8 +44,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @param  $payment
      * @return array
      */
-    public function prepareCardInfo($payment) {
-
+    public function prepareCardInfo($payment)
+    {
         $order = $payment->getOrder();
         $info = $this->getInfoInstance();
 
@@ -52,8 +66,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @param $data
      * @return mixed
      */
-    public function assignData($data) {
-
+    public function assignData($data)
+    {
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
@@ -66,29 +80,30 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
     }
 
     /**
-     * @param $payment
+     * @param Varien_Object $payment
      * @param $amount
      * @return Mage_Payment_Model_Abstract|void
      * @throws Mage_Core_Exception
      */
-    public function capture(Varien_Object $payment, $amount) {
-
+    public function capture(Varien_Object $payment, $amount)
+    {
         $this->initPaymentwallConfig();
-
         $payment->setAmount($amount);
 
         $charge = new Paymentwall_Charge();
-        $charge->create(array_merge(
+        $chargeData = array_merge(
             $this->prepareCardInfo($payment),
             $this->prepareUserProfile($payment->getOrder()), // for User Profile API
             $this->getExtraData()
-        ));
+        );
+        $charge->create($chargeData);
 
+        $rawResponse = json_decode($charge->getRawResponseData(), true);
         $response = $charge->getPublicData();
         // Debug
         $this->log($response, 'Charge response');
 
-        if ($charge->isSuccessful()) {
+        if ($charge->isSuccessful() && empty($rawResponse['secure'])) {
             if ($charge->isCaptured()) {
 
                 $payment->setTransactionId($charge->getId());
@@ -99,6 +114,13 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
             } elseif ($charge->isUnderReview()) {
                 $payment->setIsTransactionPending(true);
             }
+        } elseif (!empty($rawResponse['secure'])) {
+            $payment->setIsTransactionPending(true);
+            Mage::getModel('core/session')
+                ->setHas3DS(true)
+                ->setSecureFormHtml($rawResponse['secure']['formHTML'])
+                ->setChargeOrderId($payment->getOrder()->getIncrementId())
+                ->setChargeData(json_encode($chargeData));
         } else {
             $payment->setIsTransactionPending(true)
                 ->setIsFraudDetected(true);
@@ -118,7 +140,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @param Mage_Payment_Model_Recurring_Profile $profile
      * @throws Mage_Core_Exception
      */
-    public function validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile) {
+    public function validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile)
+    {
 
     }
 
@@ -129,8 +152,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @param Mage_Payment_Model_Info $payment
      * @throws Exception
      */
-    public function submitRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile, Mage_Payment_Model_Info $payment) {
-
+    public function submitRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile, Mage_Payment_Model_Info $payment)
+    {
         $this->initPaymentwallConfig();
         $quote = Mage::getSingleton('checkout/session')->getQuote();
 
@@ -145,7 +168,6 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         $this->log($response, 'Subscription Response Data');
 
         if ($paymentwallSubscription->isSuccessful() && $response->object == 'subscription') {
-
             $profile->setReferenceId($response->id);
             if ($response->active) {
                 $profile->setState(Mage_Sales_Model_Recurring_Profile::STATE_ACTIVE);
@@ -164,8 +186,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @param $quote
      * @return array
      */
-    protected function prepareSubscriptionData(Mage_Payment_Model_Recurring_Profile $profile, $quote) {
-
+    protected function prepareSubscriptionData(Mage_Payment_Model_Recurring_Profile $profile, $quote)
+    {
         $post = Mage::app()->getRequest()->getPost('payment');
 
         return array_merge(
@@ -188,8 +210,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @param Mage_Payment_Model_Recurring_Profile $profile
      * @return array
      */
-    protected function prepareTrialData(Mage_Payment_Model_Recurring_Profile $profile) {
-
+    protected function prepareTrialData(Mage_Payment_Model_Recurring_Profile $profile)
+    {
         if (!$profile->getTrialPeriodFrequency()) {
             return array();
         }
@@ -209,8 +231,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      * @param Varien_Object $result
      * @return Varien_Object
      */
-    public function getRecurringProfileDetails($referenceId, Varien_Object $result) {
-
+    public function getRecurringProfileDetails($referenceId, Varien_Object $result)
+    {
         $this->initPaymentwallConfig();
 
         $paymentwallSubscription = new Paymentwall_Subscription($referenceId);
@@ -226,7 +248,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      *
      * @return bool
      */
-    public function canGetRecurringProfileDetails() {
+    public function canGetRecurringProfileDetails()
+    {
         return true;
     }
 
@@ -235,7 +258,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      *
      * @param Mage_Payment_Model_Recurring_Profile $profile
      */
-    public function updateRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile) {
+    public function updateRecurringProfile(Mage_Payment_Model_Recurring_Profile $profile)
+    {
         // TODO: Implement updateRecurringProfile() method.
     }
 
@@ -244,8 +268,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
      *
      * @param Mage_Payment_Model_Recurring_Profile $profile
      */
-    public function updateRecurringProfileStatus(Mage_Payment_Model_Recurring_Profile $profile) {
-
+    public function updateRecurringProfileStatus(Mage_Payment_Model_Recurring_Profile $profile)
+    {
         $this->initPaymentwallConfig();
 
         $paymentwallSubscription = new Paymentwall_Subscription($profile->getReferenceId());
@@ -255,8 +279,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         }
     }
 
-    public function getExtraData() {
-
+    public function getExtraData()
+    {
         $customerId = $_SERVER['REMOTE_ADDR'];
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             $customer = Mage::getSingleton('customer/session')->getCustomer();
@@ -265,7 +289,63 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
 
         return array(
             'custom[integration_module]' => 'magento',
-            'uid' => $customerId
+            'uid' => $customerId,
+            'secure_redirect_url' => Mage::getUrl('paymentwall/payment/threeds', array('_secure' => true))
         );
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order $order
+     * @param $chargeData
+     * @return bool
+     * @throws Exception
+     */
+    public function processOrderAfter3Ds($order, $chargeData)
+    {
+        $this->setCurrentOrder($order);
+        $this->initPaymentwallConfig();
+        $charge = new Paymentwall_Charge();
+        $charge->create($chargeData);
+
+        $response = $charge->getPublicData();
+        // Debug
+        $this->log($response, 'Charge response');
+
+        if ($charge->isSuccessful()) {
+            if ($charge->isCaptured()) {
+                $invoice = $order->getInvoiceCollection()
+                    ->addAttributeToSort('created_at', 'DSC')
+                    ->setPage(1, 1)
+                    ->getFirstItem();
+
+                if ($invoice->getId()) {
+                    //$this->payInvoice($charge->getId(), $invoice);
+                    $this->payInvoice('adasdasd', $invoice);
+                } else {
+                    $this->makeInvoice($charge->getId());
+                }
+            } elseif ($charge->isUnderReview()) {
+                $order->setState(Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW, true)
+                    ->save();
+            }
+            // Clear session
+            Mage::getModel('core/session')
+                ->setHas3DS(false)
+                ->setSecureFormHtml(null)
+                ->setChargeOrderId(null)
+                ->setChargeData(null);
+            return true;
+        } else {
+            $order->getPayment()
+                ->setIsTransactionPending(true)
+                ->setIsFraudDetected(true);
+            $errors = json_decode($response, true);
+            $this->log($errors, 'Charge error response');
+            $strErrors = Mage::helper('paymentwall')->__("Brick error(s):");
+            $strErrors .= "\n - Code #{$errors['error']['code']}: " . Mage::helper('paymentwall')->__($errors['error']['message']);
+            Mage::getSingleton('core/session')->addError($strErrors);
+        }
+
+        return false;
     }
 }

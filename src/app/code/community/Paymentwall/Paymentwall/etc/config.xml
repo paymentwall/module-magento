@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Paymentwall_Paymentwall>
-            <version>1.2.4</version>
+            <version>1.2.5</version>
         </Paymentwall_Paymentwall>
     </modules>
     <frontend>
@@ -57,7 +57,7 @@
                 <title>Credit Card</title>
                 <model>paymentwall/method_pwbrick</model>
                 <active>1</active>
-                <order_status>processing</order_status>
+                <order_status>pending_payment</order_status>
                 <payment_action>authorize_capture</payment_action>
                 <allowspecific>0</allowspecific>
                 <debug_mode>0</debug_mode>

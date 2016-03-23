@@ -124,16 +124,16 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
 
     /**
      * Make invoice for paid order
-     * @param $pingback
+     * @param $refId
      * @throws Exception
      * @throws bool
      */
-    public function makeInvoice($pingback) {
+    public function makeInvoice($refId) {
         $order = $this->getCurrentOrder();
         if ($order) {
 
             $payment = $order->getPayment();
-            $payment->setTransactionId($pingback->getReferenceId())
+            $payment->setTransactionId($refId)
                 ->setPreparedMessage('Invoice created by Paymentwall module')
                 ->setShouldCloseParentTransaction(true)
                 ->setIsTransactionClosed(0)
@@ -152,22 +152,23 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
     }
 
     /**
-     * @param $pingback
+     * @param $refId
      * @param $invoice
      */
-    public function payInvoice(Paymentwall_Pingback $pingback, Mage_Sales_Model_Order_Invoice $invoice) {
+    public function payInvoice($refId, Mage_Sales_Model_Order_Invoice $invoice) {
         $order = $this->getCurrentOrder();
+
         if ($order) {
             $payment = $order->getPayment();
             $message = Mage::helper('sales')->__('Captured amount of %s online.', $order->getBaseCurrency()->formatTxt($invoice->getBaseGrandTotal()));
 
-            $invoice->setTransactionId($pingback->getReferenceId())
+            $invoice->setTransactionId($refId)
                 ->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE);
             $invoice->getOrder()->setIsInProcess(true);
             $invoice->getOrder()->addStatusHistoryComment($message)->setIsCustomerNotified(true);
 
-            $payment->setTransactionId($pingback->getReferenceId())
-                ->setLastTransId($pingback->getReferenceId())
+            $payment->setTransactionId($refId)
+                ->setLastTransId($refId)
                 ->setCurrencyCode($order->getOrderCurrencyCode())
                 ->setPreparedMessage('Payment approved by Paymentwall')
                 ->setShouldCloseParentTransaction(true)
