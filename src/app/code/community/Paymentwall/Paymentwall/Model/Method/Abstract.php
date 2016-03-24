@@ -142,7 +142,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
 
             // notify customer
             $invoice = $payment->getCreatedInvoice();
-            if ($invoice && !$order->getEmailSent()) {
+            if ($invoice && !$order->getEmailSent() && !Mage::getStoreConfig('system/smtp/disable')) {
                 $order->sendNewOrderEmail()
                     ->addStatusHistoryComment(Mage::helper('paymentwall')->__('Notified customer about invoice #%s.', $invoice->getIncrementId()))
                     ->setIsCustomerNotified(true)
@@ -178,7 +178,7 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
             $order->setState('processing', true, "Payment has been received", false)->save();
 
             // notify customer
-            if ($invoice && !$order->getEmailSent() && Mage::getStoreConfig('system/smtp/disable')) {
+            if ($invoice && !$order->getEmailSent() && !Mage::getStoreConfig('system/smtp/disable')) {
                 $order->sendNewOrderEmail()
                     ->addStatusHistoryComment(Mage::helper('paymentwall')->__('Notified customer about invoice #%s.', $invoice->getIncrementId()))
                     ->setIsCustomerNotified(true)
