@@ -11,13 +11,5 @@ class Paymentwall_Paymentwall_Block_Checkout_Info_Method_Pwbrick extends Mage_Pa
     protected function _construct()
     {
         parent::_construct();
-        $this->setTemplate('paymentwall/checkout/info/method/pwbrick.phtml');
-    }
-
-    public function setInfo($info)
-    {
-        $this->setData('info', $info);
-        $this->setData('method', $info->getMethodInstance());
-        return $this;
     }
 }

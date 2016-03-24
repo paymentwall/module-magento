@@ -173,12 +173,12 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
                 ->setPreparedMessage('Payment approved by Paymentwall')
                 ->setShouldCloseParentTransaction(true)
                 ->setIsTransactionClosed(0)
-                ->registerCaptureNotification();
+                ->registerCaptureNotification($invoice->getBaseGrandTotal());
             $invoice->pay();
             $order->setState('processing', true, "Payment has been received", false)->save();
 
             // notify customer
-            if ($invoice && !$order->getEmailSent()) {
+            if ($invoice && !$order->getEmailSent() && Mage::getStoreConfig('system/smtp/disable')) {
                 $order->sendNewOrderEmail()
                     ->addStatusHistoryComment(Mage::helper('paymentwall')->__('Notified customer about invoice #%s.', $invoice->getIncrementId()))
                     ->setIsCustomerNotified(true)

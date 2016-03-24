@@ -89,11 +89,12 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
     {
         $this->initPaymentwallConfig();
         $payment->setAmount($amount);
+        $order = $payment->getOrder();
 
         $charge = new Paymentwall_Charge();
         $chargeData = array_merge(
             $this->prepareCardInfo($payment),
-            $this->prepareUserProfile($payment->getOrder()), // for User Profile API
+            $this->prepareUserProfile($order), // for User Profile API
             $this->getExtraData()
         );
         $charge->create($chargeData);
@@ -116,10 +117,14 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
             }
         } elseif (!empty($rawResponse['secure'])) {
             $payment->setIsTransactionPending(true);
+            $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
+                'pending_payment', '3D Secure Auth Now Taking Place')->save();
             Mage::getModel('core/session')
+                ->setBrickQuoteId($order->getQuoteId())
+                ->setBrickOrderId($order->getId())
                 ->setHas3DS(true)
                 ->setSecureFormHtml($rawResponse['secure']['formHTML'])
-                ->setChargeOrderId($payment->getOrder()->getIncrementId())
+                ->setChargeOrderId($order->getIncrementId())
                 ->setChargeData(json_encode($chargeData));
         } else {
             $payment->setIsTransactionPending(true)
@@ -304,8 +309,10 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
     {
         $this->setCurrentOrder($order);
         $this->initPaymentwallConfig();
+
         $charge = new Paymentwall_Charge();
         $charge->create($chargeData);
+        $coreSession = Mage::getSingleton('core/session');
 
         $response = $charge->getPublicData();
         // Debug
@@ -319,8 +326,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
                     ->getFirstItem();
 
                 if ($invoice->getId()) {
-                    //$this->payInvoice($charge->getId(), $invoice);
-                    $this->payInvoice('adasdasd', $invoice);
+                    $this->payInvoice($charge->getId(), $invoice);
                 } else {
                     $this->makeInvoice($charge->getId());
                 }
@@ -328,12 +334,22 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
                 $order->setState(Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW, true)
                     ->save();
             }
+
+            // Set prepare data for success page
+            Mage::getSingleton('checkout/session')
+                ->setLastOrderId($coreSession->getBrickOrderId())
+                ->setLastQuoteId($coreSession->getBrickQuoteId())
+                ->setLastSuccessQuoteId($coreSession->getBrickQuoteId());
+
             // Clear session
-            Mage::getModel('core/session')
+            $coreSession
+                ->setBrickOrderId(null)
+                ->setBrickQuoteId(false)
                 ->setHas3DS(false)
                 ->setSecureFormHtml(null)
                 ->setChargeOrderId(null)
                 ->setChargeData(null);
+
             return true;
         } else {
             $order->getPayment()
