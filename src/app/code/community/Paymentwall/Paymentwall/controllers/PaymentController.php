@@ -54,13 +54,16 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
 
             try {
                 if (Mage::getModel('paymentwall/method_pwbrick')->processOrderAfter3Ds($order, $chargeData)) {
-                    $this->_redirect('checkout/onepage/success', array('_secure' => true));
+                    $url = Mage::getUrl('checkout/onepage/success', array('_query' => '_secure=true'));
+                    Mage::app()->getResponse()->setRedirect($url)->sendResponse();
+                    die;
                 }
             } catch (Mage_Exception $e) {
                 Mage::getSingleton('core/session')->addError($e->getMessage());
             }
-
-            $this->_redirect('/');
+            
+            $url = Mage::getUrl('/');
+            Mage::app()->getResponse()->setRedirect($url)->sendResponse();
         } elseif ($secureForm = Mage::getModel('core/session')->getSecureFormHtml()) {
             $this->getResponse()->setBody($secureForm);
         }
