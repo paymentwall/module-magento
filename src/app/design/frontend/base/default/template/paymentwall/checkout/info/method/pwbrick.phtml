@@ -1,0 +1,7 @@
+<?php
+$info = $this->getData('info');
+$method = $this->getData('method');
+?>
+<?php if (!$this->getHideTitle()): ?>
+    <?php echo $this->escapeHtml($method->getConfigData('title')) ?><br/>
+<?php endif; ?>

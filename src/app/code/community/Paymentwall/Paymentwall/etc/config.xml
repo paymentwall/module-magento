@@ -62,6 +62,17 @@
                 <allowspecific>0</allowspecific>
                 <debug_mode>0</debug_mode>
             </paymentwall_pwbrick>
+            <paymentwall_pwlocaluni>
+                <title>Paymentwall Uni</title>
+                <active>1</active>
+                <model>paymentwall/method_pwlocaluni</model>
+                <order_status>pending_payment</order_status>
+                <fee_payer>buyer</fee_payer>
+                <allowspecific>0</allowspecific>
+                <paymentwall_istest>0</paymentwall_istest>
+                <paymentwall_delivery>1</paymentwall_delivery>
+                <debug_mode>0</debug_mode>
+            </paymentwall_pwlocaluni>
         </payment>
     </default>
 </config>

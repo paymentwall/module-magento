@@ -21,7 +21,7 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
         $result = Mage::getModel('paymentwall/pingback')->handlePingback();
         $this->getResponse()->setBody($result);
     }
-
+    
     /**
      * Show Paymentwall widget
      * For Pw Local
@@ -30,6 +30,11 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
     {
         $this->loadLayout();
         $this->renderLayout();
+    }
+
+    public function pwlocaluniAction(){
+        $this->loadLayout();
+        $this->renderLayout();   
     }
 
     /**
