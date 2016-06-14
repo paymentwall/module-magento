@@ -18,7 +18,11 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
     public function handlePingback()
     {
         // Load paymentwall configs
-        Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
+        if(empty($_GET['widget_type'])){
+            Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
+        } else {
+            Mage::getModel('paymentwall/method_pwlocaluni')->initPaymentwallConfig();
+        }
 
         $pingback = new Paymentwall_Pingback($_GET, $_SERVER['REMOTE_ADDR']);
 

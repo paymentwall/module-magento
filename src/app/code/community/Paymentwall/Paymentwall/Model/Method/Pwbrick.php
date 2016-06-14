@@ -349,7 +349,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
                 ->setSecureFormHtml(null)
                 ->setChargeOrderId(null)
                 ->setChargeData(null);
-
+            // Debug
+            $this->log($response, 'Charge success');
             return true;
         } else {
             $order->getPayment()
