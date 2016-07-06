@@ -10,17 +10,27 @@ if (!class_exists('Paymentwall_Config'))
 class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
 {
     const DEFAULT_PINGBACK_RESPONSE = 'OK';
-
+    const BRICK_METHOD = 'paymentwall_pwbrick';
+    
     /**
      * Handle pingback
      * @return string
      */
     public function handlePingback()
     {
-        // Load paymentwall configs
-        Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
-
         $pingback = new Paymentwall_Pingback($_GET, $_SERVER['REMOTE_ADDR']);
+
+        $order = Mage::getModel('sales/order')->loadByIncrementId($pingback->getProductId());
+        if (empty($order)) {
+            die("Order invalid");
+        }
+        
+        // Load paymentwall configs
+        if ($order->getPayment()->getMethod() == self::BRICK_METHOD) {
+            Mage::getModel('paymentwall/method_pwbrick')->initPaymentwallConfig(true);
+        } else {
+            Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
+        }
 
         if ($pingback->validate()) {
 
