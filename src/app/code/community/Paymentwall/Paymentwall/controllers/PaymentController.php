@@ -32,6 +32,12 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
         $this->renderLayout();
     }
 
+    public function pwlocaluniAction()
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     /**
      * 3Ds Processing
      */
