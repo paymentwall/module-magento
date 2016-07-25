@@ -33,16 +33,16 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
      * Init paymentwall configs
      */
     public function initPaymentwallConfig($pingback = false) {
-        Paymentwall_Config::getInstance()->set(array(
-            'api_type' => Paymentwall_Config::API_GOODS,
-            'public_key' => $this->getConfigData('paymentwall_public_key'),
-            'private_key' => $this->getConfigData('paymentwall_private_key')
-        ));
         if ($pingback) {
-            $pwlocalModel = Mage::getModel('paymentwall/method_pwlocal');
-            Paymentwall_Config::getInstance()->setPrivateKey(
-                $pwlocalModel->getConfigData('paymentwall_private_key')
-            );
+            Paymentwall_Config::getInstance()->set(array(
+                'private_key' => $this->getConfigData('paymentwall_secret_key')
+            ));
+        } else {
+            Paymentwall_Config::getInstance()->set(array(
+                'api_type' => Paymentwall_Config::API_GOODS,
+                'public_key' => $this->getConfigData('paymentwall_public_key'),
+                'private_key' => $this->getConfigData('paymentwall_private_key')
+            ));
         }
     }
 

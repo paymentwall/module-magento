@@ -11,6 +11,7 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
 {
     const DEFAULT_PINGBACK_RESPONSE = 'OK';
     const BRICK_METHOD = 'paymentwall_pwbrick';
+    const PWLOCAL_METHOD = 'paymentwall_pwlocal';
     
     /**
      * Handle pingback
@@ -25,11 +26,14 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
             die("Order invalid");
         }
         
+        $method = $order->getPayment()->getMethod();
         // Load paymentwall configs
-        if ($order->getPayment()->getMethod() == self::BRICK_METHOD) {
+        if ($method == self::BRICK_METHOD) {
             Mage::getModel('paymentwall/method_pwbrick')->initPaymentwallConfig(true);
-        } else {
+        } elseif ($method == self::PWLOCAL_METHOD) {
             Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
+        } else {
+            Mage::getModel('paymentwall/method_pwlocaluni')->initPaymentwallConfig();
         }
 
         if ($pingback->validate()) {
