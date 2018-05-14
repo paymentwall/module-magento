@@ -1,0 +1,6 @@
+.paymentwall-widget{
+    width: 100%;
+}
+#paymentwall_pwbrick_expiration, #paymentwall_pwbrick_expiration_yr{
+    width: 60px;
+}
