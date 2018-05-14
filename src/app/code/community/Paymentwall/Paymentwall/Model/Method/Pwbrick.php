@@ -104,9 +104,12 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
         // Debug
         $this->log($response, 'Charge response');
 
+        $payment->setIsTransactionPending(true);
+
         if ($charge->isSuccessful() && empty($rawResponse['secure'])) {
             if ($charge->isCaptured()) {
                 $payment->setTransactionAdditionalInfo('saved_token', Mage::helper('core')->encrypt($charge->getCard()->getToken()));
+                $payment->setIsTransactionPending(false);
             }
         } elseif (!empty($rawResponse['secure'])) {
             $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT,
@@ -127,7 +130,6 @@ class Paymentwall_Paymentwall_Model_Method_Pwbrick extends Paymentwall_Paymentwa
             Mage::throwException($strErrors);
         }
 
-        $payment->setIsTransactionPending(true);
         return $this;
     }
 

@@ -21,7 +21,7 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
         $pingback = new Paymentwall_Pingback($_GET, $_SERVER['REMOTE_ADDR']);
 
         $order = Mage::getModel('sales/order')->loadByIncrementId($pingback->getProductId());
-        if (empty($order)) {
+        if (empty($order) || empty($order->getId())) {
             die("Order invalid");
         }
         
