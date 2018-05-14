@@ -1,0 +1,25 @@
+<?php
+$widget = $this->getWidget();
+?>
+    <div class="paymentwall-widget">
+        <?php
+        if ($widget['status']) {
+            echo $widget['content'];
+        } else {
+            echo "<h3>{$widget['content']}</h3>";
+        }
+        ?>
+    </div>
+<?php if ($widget['status']) { ?>
+    <script type="text/javascript">
+        document.observe("dom:loaded", function () {
+            // Check order status
+            var pwinterval = setInterval(function () {
+                PW.ajaxPwLocalListener('<?php echo Mage::getUrl('paymentwall/payment/ajaxPwlocal');?>', function () {
+                    clearInterval(pwinterval);
+                });
+            }, 5000);
+        });
+    </script>
+<?php
+}

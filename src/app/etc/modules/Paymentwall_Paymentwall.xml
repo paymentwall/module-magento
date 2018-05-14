@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Paymentwall_Paymentwall>
+            <active>true</active>
+            <codePool>community</codePool>
+            <depends>
+                <Mage_Payment />
+                <Mage_Sales/>
+                <Mage_Checkout/>
+            </depends>
+        </Paymentwall_Paymentwall>
+    </modules>
+</config>
