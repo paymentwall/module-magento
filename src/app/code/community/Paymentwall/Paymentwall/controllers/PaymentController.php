@@ -88,8 +88,10 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
             if ($order->getId()) {
                 $response['status'] = $order->getStatus() == self::ORDER_STATUS_AFTER_PINGBACK_SUCCESS
                     ? 1 : 0;
+
                 // Get success page redirect url
-                $response['url'] = '';
+                $redirectUrlSetting = Mage::getModel('paymentwall/method_pwlocal')->getConfigData('paymentwall_url');
+                $response['url'] = $redirectUrlSetting ? $redirectUrlSetting : Mage::getUrl('checkout/onepage/success', array('_query' => '_secure=true'));
             } else {
                 $response['status'] = 2; // Error
                 $response['message'] = 'Order Invalid';
