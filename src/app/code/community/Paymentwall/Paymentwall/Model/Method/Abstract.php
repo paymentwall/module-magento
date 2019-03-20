@@ -104,9 +104,8 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
      */
     private function prepareDeliveryData(Mage_Sales_Model_Order $order, $ref) {
         $billing = $order->getBillingAddress();
-        $shipping = $order->getShippingAddress();
 
-        return array(
+        $data = array(
             'payment_id' => $ref,
             'type' => 'digital',
             'status' => 'delivered',
@@ -115,17 +114,28 @@ class Paymentwall_Paymentwall_Model_Method_Abstract extends Mage_Payment_Model_M
             'refundable' => 'yes',
             'details' => 'Item will be delivered via email by ' . date('Y/m/d H:i:s'),
             'shipping_address[email]' => $billing->getEmail(),
-            'shipping_address[firstname]' => $shipping->getFirstname(),
-            'shipping_address[lastname]' => $shipping->getLastname(),
-            'shipping_address[country]' => $shipping->getCountry(),
-            'shipping_address[street]' => $shipping->getStreetFull(),
-            'shipping_address[state]' => $shipping->getRegion(),
-            'shipping_address[phone]' => $shipping->getTelephone(),
-            'shipping_address[zip]' => $shipping->getPostcode(),
-            'shipping_address[city]' => $shipping->getCity(),
+
             'reason' => 'none',
             'is_test' => $this->getConfigData('paymentwall_istest') ? 1 : 0,
         );
+
+        $shipping = $order->getShippingAddress();
+
+        if (!empty($shipping)) {
+            $data['type'] = 'physical';
+            $data = array_merge($data, array(
+                'shipping_address[firstname]' => $shipping->getFirstname(),
+                'shipping_address[lastname]' => $shipping->getLastname(),
+                'shipping_address[country]' => $shipping->getCountry(),
+                'shipping_address[street]' => $shipping->getStreetFull(),
+                'shipping_address[state]' => $shipping->getRegion(),
+                'shipping_address[phone]' => $shipping->getTelephone(),
+                'shipping_address[zip]' => $shipping->getPostcode(),
+                'shipping_address[city]' => $shipping->getCity(),
+            ));
+        }
+
+        return $data;
     }
 
     /**
