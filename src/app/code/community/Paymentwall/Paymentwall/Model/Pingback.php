@@ -32,7 +32,7 @@ class Paymentwall_Paymentwall_Model_Pingback extends Mage_Core_Model_Abstract
             Mage::getModel('paymentwall/method_pwlocal')->initPaymentwallConfig();
         }
 
-        if ($pingback->validate()) {
+        if ($pingback->validate(true)) {
 
             if ($this->isRecurring($pingback)) {
                 return $this->processPingbackRecurringProfile($pingback);
