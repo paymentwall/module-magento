@@ -1,25 +1,75 @@
-<?php
-$widget = $this->getWidget();
-?>
-    <div class="paymentwall-widget">
-        <?php
-        if ($widget['status']) {
-            echo $widget['content'];
-        } else {
-            echo "<h3>{$widget['content']}</h3>";
-        }
-        ?>
-    </div>
-<?php if ($widget['status']) { ?>
-    <script type="text/javascript">
-        document.observe("dom:loaded", function () {
-            // Check order status
-            var pwinterval = setInterval(function () {
-                PW.ajaxPwLocalListener('<?php echo Mage::getUrl('paymentwall/payment/ajaxPwlocal');?>', function () {
-                    clearInterval(pwinterval);
+<img src="<?= $this->getSkinUrl('images/paymentwall/icon_loading.gif') ?>" id="pw_icon_loading">
+<style>
+    .img_ps {
+        margin-left: 32px;
+    }
+</style>
+<script type="text/javascript">
+    // Display none Paymentwall payment method
+    document.getElementById('p_method_paymentwall_pwlocal').style.display = 'none'
+    document.querySelector('label[for="p_method_paymentwall_pwlocal"]').style.display = 'none'
+
+    var urlGetUserCountry = "<?= $this->getUrl('paymentwall/UserCountry/getUserCountry') ?>"
+    var urlGetLocalMethod = "<?= $this->getUrl('paymentwall/LocalMethod/getLocalMethod') ?>"
+    PW.getUserCountry(urlGetUserCountry, function (countryCode) {
+        PW.getPaymentwallLocalMethods(countryCode, urlGetLocalMethod, function (localMethods) {
+            var paymentwallLocalMethod = document.getElementById('checkout-payment-method-load')
+            if (Array.isArray(localMethods)) {
+                document.getElementById("pw_icon_loading").style.display = "none"
+                document.getElementById('dt_method_paymentwall_pwlocal').remove()
+
+                var ddPaymentwall = document.getElementById('dd_method_paymentwall_pwlocal')
+
+                localMethods.reverse().forEach(function(item, index) {
+                    var elem = document.createElement("dt")
+                    elem.innerHTML =
+                        "<input value='paymentwall_pwlocal' data-id='" + item['id'] + "' class='radio' type='radio' autocomplete='off' name='payment[method]'></input>"
+                        + "<label for='payment_method_gateway'>"
+                        + item['name']
+                        + "</label>"
+                        + "<img class='img_ps' alt='" + item['name'] + "' src='" + item['img_url'] + "'>"
+                    // paymentwallLocalMethod.appe(elem)
+                    insertAfter(ddPaymentwall, elem)
+
                 });
-            }, 5000);
-        });
-    </script>
-<?php
-}
+            }
+        }, function () {
+            stopAjax()
+        })
+    }, function () {
+        stopAjax()
+    })
+
+    // Ajax fail, stop ajax and display Paymentwall payment method
+    function stopAjax()
+    {
+        document.getElementById("pw_icon_loading").style.display = "none"
+        document.getElementById('p_method_paymentwall_pwlocal').style.display = 'block'
+        document.querySelector('label[for="p_method_paymentwall_pwlocal"]').style.display = '-webkit-inline-box'
+    }
+
+    function insertAfter(referenceNode, newNode) {
+        referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+    }
+</script>
+<script type="text/javascript">
+    var btn = document.querySelector("#payment-buttons-container .button")
+    btn.addEventListener('click', function() {
+        var paymentMethodInputElement = document.querySelector('input[name="payment[method]"]:checked')
+        var paymentMethodName = paymentMethodInputElement.getAttribute('data-id')
+        var paymentMethodValue = paymentMethodInputElement.value
+        if (paymentMethodName && paymentMethodValue === 'paymentwall_pwlocal') {
+            jQuery.ajax({
+                url: "<?= $this->getUrl('paymentwall/Payment/storePaymentMethodToSession') ?>",
+                type: 'POST',
+                data: {
+                    paymentMethod: paymentMethodName
+                },
+                success: function (response) {
+
+                }
+            })
+        }
+
+    })
+</script>

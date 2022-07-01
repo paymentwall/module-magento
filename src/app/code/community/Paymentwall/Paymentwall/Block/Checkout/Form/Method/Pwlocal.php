@@ -16,6 +16,7 @@ class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Pwlocal extends Payment
     {
         parent::_construct();
         $this->setPaymentModelName('pwlocal');
+        $this->setTemplate('paymentwall/checkout/form/method/pwlocal.phtml');
     }
 
     function getWidget()
@@ -25,7 +26,6 @@ class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Pwlocal extends Payment
             'content' => '',
             'status' => false
         );
-
         if ($order) {
             try {
                 $model = $this->getPaymentModel();
@@ -38,6 +38,7 @@ class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Pwlocal extends Payment
                     'height' => '600'
                 ));
                 $return['status'] = true;
+                $return['widget_url'] = $widget->getUrl();
             } catch (Exception $e) {
                 Mage::logException($e);
                 $return['content'] = Mage::helper('paymentwall')->__('Errors, Please try again!');
