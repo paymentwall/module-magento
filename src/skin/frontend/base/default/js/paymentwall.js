@@ -100,6 +100,9 @@ var PW = {
             },
             success: function (response) {
                 var responseJson = JSON.parse(response)
+                if (responseJson.data.type === 'undefined' || responseJson.data.type === 'Error') {
+                    callbackError()
+                }
                 callbackSuccess(responseJson['data'])
             },
             error: function () {
@@ -113,9 +116,10 @@ var PW = {
             type: 'POST',
             success: function(response) {
                 var responseJson = JSON.parse(response)
-                if (typeof responseJson['data'] !== 'undefined') {
-                    callbackSuccess(responseJson['data'])
+                if (typeof responseJson['data'] === 'undefined' || !responseJson['data']) {
+                    callbackError()
                 }
+                callbackSuccess(responseJson['data'])
             },
             error: function () {
                 callbackError()
