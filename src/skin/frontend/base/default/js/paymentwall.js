@@ -100,7 +100,8 @@ var PW = {
             },
             success: function (response) {
                 var responseJson = JSON.parse(response)
-                if (responseJson.data.type === 'undefined' || responseJson.data.type === 'Error') {
+                if (responseJson.data.type === 'undefined' || responseJson.data.type === 'Error'
+                    || !responseJson['data']) {
                     callbackError()
                 }
                 callbackSuccess(responseJson['data'])
