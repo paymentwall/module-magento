@@ -26,6 +26,7 @@ class Paymentwall_Paymentwall_Block_Checkout_Form_Method_Pwlocal extends Payment
             'content' => '',
             'status' => false
         );
+
         if ($order) {
             try {
                 $model = $this->getPaymentModel();

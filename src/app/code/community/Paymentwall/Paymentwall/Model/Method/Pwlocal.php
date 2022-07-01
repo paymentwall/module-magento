@@ -17,8 +17,6 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
     const DEFAULT_USER_ID = 'user101';
     const SIGN_VERSION_TWO = 2;
 
-//    protected $_formBlockType = 'pay/form_pay';
-
     /**
      * Constructor method.
      * Set some internal properties
@@ -43,6 +41,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
      */
     public function getPaymentWidget(Mage_Sales_Model_Order $order) {
         $this->initPaymentwallConfig();
+
         $customerId = $_SERVER['REMOTE_ADDR'];
 
         if(Mage::getSingleton('customer/session')->isLoggedIn()){
@@ -94,8 +93,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
         try {
             $params = [
                 'key' => $this->getConfigData('paymentwall_public_key'),
-//                'user_ip' => Mage::helper('core/http')->getRemoteAddr(),
-                'user_ip' => '118.70.80.35',
+                'user_ip' => Mage::helper('core/http')->getRemoteAddr(),
                 'uid' => self::DEFAULT_USER_ID
             ];
 
