@@ -23,7 +23,7 @@
                 localMethods.reverse().forEach(function(item, index) {
                     var elem = document.createElement("dt")
                     elem.innerHTML =
-                        "<input value='paymentwall_pwlocal' data-id='" + item['id'] + "' class='radio' type='radio' autocomplete='off' name='payment[method]'></input>"
+                        "<input value='paymentwall_pwlocal' data-id='" + item['id'] + "' class='radio' type='radio' autocomplete='off' name='payment[method]' onclick=payment.switchMethod('" + item['id'] + "')></input>"
                         + "<label for='payment_method_gateway'>"
                         + item['name']
                         + "</label>"
