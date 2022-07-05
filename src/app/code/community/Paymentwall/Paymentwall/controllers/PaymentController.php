@@ -32,7 +32,6 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
         $this->renderLayout();
         $widget = $this->getLayout()->getBlockSingleton('paymentwall/checkout_form_method_pwlocal')->getWidget();
         $this->_redirectUrl($widget['widget_url']);
-        Mage::getSingleton('core/session')->setPaymentMethod('');
     }
 
     /**

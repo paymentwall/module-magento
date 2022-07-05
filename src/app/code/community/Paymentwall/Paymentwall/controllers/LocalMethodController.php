@@ -14,7 +14,7 @@ class Paymentwall_Paymentwall_LocalMethodController extends Mage_Core_Controller
     {
         $countryCode = $this->getRequest()->get('countryCode');
         if ($countryCode) {
-            $result = Mage::getModel('paymentwall/method_pwlocal')->getLocalMethod($countryCode);
+            $result = Mage::getModel('paymentwall/method_pwlocal')->getLocalMethods($countryCode);
             $this->getResponse()->setBody($result);
         }
     }

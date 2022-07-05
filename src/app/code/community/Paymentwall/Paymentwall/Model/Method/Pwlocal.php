@@ -64,7 +64,8 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
                 'success_url' => $this->getConfigData('paymentwall_url') ?
                     $this->getConfigData('paymentwall_url') : Mage::getBaseUrl() . 'checkout/onepage/success',
                 'test_mode' => (int)$this->getConfigData('paymentwall_istest'),
-                'integration_module' => 'magento'
+                'integration_module' => 'magento',
+                'pingback_url' => Mage::getBaseUrl() . 'paymentwall/payment/ipn'
             ),
             $this->prepareUserProfile($order) // for User Profile API
         );
@@ -72,6 +73,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
         $paymentSystem = Mage::getSingleton('core/session')->getPaymentMethod();
         if ($paymentSystem) {
             $additionalParams['ps'] = $paymentSystem;
+            Mage::getSingleton('core/session')->setPaymentMethod('');
         }
 
         $widget = new Paymentwall_Widget(
@@ -84,7 +86,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
         return $widget;
     }
 
-    public function getUserCountryByRemoteAddress()
+    public function getUserCountryFromApi()
     {
         $response = [
             'success' => 0
@@ -112,7 +114,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
         return json_encode($response);
     }
 
-    public function getLocalMethod($countryCode)
+    public function getLocalMethods($countryCode)
     {
         $response = [
             'success' => 0
