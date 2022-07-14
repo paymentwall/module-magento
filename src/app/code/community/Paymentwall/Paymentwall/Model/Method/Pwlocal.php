@@ -15,7 +15,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
     protected $_canReviewPayment = false;
     protected $_canCreateBillingAgreement = false;
     const DEFAULT_USER_ID = 'user101';
-    const SIGN_VERSION_TWO = 2;
+    const SIGN_VERSION_THREE = 3;
 
     /**
      * Constructor method.
@@ -124,7 +124,7 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
             $params = array(
                 'key' => $this->getConfigData('paymentwall_public_key'),
                 'country_code' => $countryCode,
-                'sign_version' => self::SIGN_VERSION_TWO
+                'sign_version' => self::SIGN_VERSION_THREE
             );
 
             Paymentwall_Config::getInstance()->set(array('private_key' => $this->getConfigData('paymentwall_private_key')));
