@@ -12,7 +12,9 @@ class Paymentwall_Paymentwall_LocalMethodController extends Mage_Core_Controller
 {
     public function getLocalMethodAction()
     {
+        $defaultResult = [];
         if (!$this->getRequest()->isPost()) {
+            $this->getResponse()->setBody(json_encode($defaultResult));
             return;
         }
         $countryCode = $this->getRequest()->get('countryCode');

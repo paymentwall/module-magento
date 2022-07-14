@@ -14,7 +14,9 @@ class Paymentwall_Paymentwall_UserCountryController extends Mage_Core_Controller
 
     public function getUserCountryAction()
     {
+        $defaultResult = [];
         if (!$this->getRequest()->isPost()) {
+            $this->getResponse()->setBody(json_encode($defaultResult));
             return;
         }
         $result = Mage::getModel('paymentwall/method_pwlocal')->getUserCountryFromApi();
