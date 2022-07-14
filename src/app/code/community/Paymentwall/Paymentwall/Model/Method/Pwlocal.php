@@ -25,11 +25,6 @@ class Paymentwall_Paymentwall_Model_Method_Pwlocal extends Paymentwall_Paymentwa
         parent::__construct('pwlocal');
     }
 
-    public function assignData($data)
-    {
-        Mage::log($data->getPayInstallment());
-    }
-
     public function getOrderPlaceRedirectUrl() {
         return Mage::getUrl('paymentwall/payment/pwlocal', array('_secure' => true));
     }
