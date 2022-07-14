@@ -30,6 +30,8 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
     {
         $this->loadLayout();
         $this->renderLayout();
+        $widget = $this->getLayout()->getBlockSingleton('paymentwall/checkout_form_method_pwlocal')->getWidget();
+        $this->_redirectUrl($widget['widget_url']);
     }
 
     /**
@@ -105,5 +107,11 @@ class Paymentwall_Paymentwall_PaymentController extends Mage_Core_Controller_Fro
 
         $this->getResponse()->clearHeaders()->setHeader('Content-type', 'application/json', true);
         $this->getResponse()->setBody(json_encode($response));
+    }
+
+    public function storePaymentMethodToSessionAction()
+    {
+        $paymentMethodName = $this->getRequest()->get('paymentMethod');
+        Mage::getModel('paymentwall/method_pwlocal')->storePaymentMethodToSession($paymentMethodName);
     }
 }

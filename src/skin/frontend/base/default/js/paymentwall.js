@@ -45,8 +45,7 @@ var PW = {
                             stopintervalcallback();
                         }
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     alert(transport.responseText);
                     if (stopintervalcallback) {
                         stopintervalcallback();
@@ -91,5 +90,40 @@ var PW = {
                 origin_save();
             }
         });
+    },
+    "getPaymentwallLocalMethods": function (countryCode, url, callbackSuccess, callbackError) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                countryCode: countryCode
+            },
+            success: function (response) {
+                var responseJson = JSON.parse(response)
+                if (typeof responseJson['data'] === 'undefined' || !responseJson['data']) {
+                    callbackError()
+                }
+                callbackSuccess(responseJson['data'])
+            },
+            error: function () {
+                callbackError()
+            }
+        })
+    },
+    "getUserCountry": function (url, callbackSuccess, callbackError) {
+        jQuery.ajax({
+            url: url,
+            type: 'POST',
+            success: function(response) {
+                var responseJson = JSON.parse(response)
+                if (typeof responseJson['data'] === 'undefined' || !responseJson['data']) {
+                    callbackError()
+                }
+                callbackSuccess(responseJson['data'])
+            },
+            error: function () {
+                callbackError()
+            }
+        })
     }
 };
